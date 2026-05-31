@@ -1,79 +1,54 @@
 /**
  * POST /api/deepstrain/webhook
  *
- * Paddle webhook → deepstrain HMAC-signed license → KV + Resend email.
+ * Lemon Squeezy webhook → deepstrain HMAC-signed license → KV + Resend email.
  * Handles solo / team / enterprise tiers independently from Atlas.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
-import { setDeepstrainLicense, setDeepstrainActivation } from "../../../lib/store";
+import { setDeepstrainLicense, setDeepstrainActivation, getDeepstrainLicense } from "../../../lib/store";
 import type { DeepstrainLicense } from "../../../lib/store";
 import { fromEmail, productUrl, SUPPORT_EMAIL } from "../../../lib/site";
+import {
+  readRawBody, verifyLemonSignature, parseLemonEvent,
+  isIssueEvent, isExpireEvent, LEMON_WEBHOOK_SECRET,
+} from "../../../lib/lemonsqueezy";
 
-// Disable Next.js body parsing — raw bytes needed for Paddle HMAC verification
+// Raw bytes required for Lemon Squeezy X-Signature verification
 export const config = { api: { bodyParser: false } };
 
-async function readRawBody(req: NextApiRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on("data", (c: Buffer) => chunks.push(c));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
-  });
-}
+const DS_SECRET    = process.env.DEEPSTRAIN_LICENSE_SECRET || "ds-dev-secret-do-not-use-in-production";
+const RESEND_KEY   = process.env.RESEND_API_KEY            || "";
+const FROM_EMAIL   = fromEmail("deepstrain");
+const NOTIFY_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL      || "";
+const LICENSE_DAYS = 35;
 
-const DS_SECRET     = process.env.DEEPSTRAIN_LICENSE_SECRET  || "ds-dev-secret-do-not-use-in-production";
-const RESEND_KEY    = process.env.RESEND_API_KEY              || "";
-const FROM_EMAIL    = fromEmail("deepstrain");
-const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET       || "";
-const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL        || "";
-const LICENSE_DAYS  = 35;
-
-async function notifyAdmin(subject: string, text: string): Promise<void> {
-  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [NOTIFY_EMAIL],
-        subject,
-        html: `<pre style="font-family:monospace;font-size:14px">${text}</pre>`,
-      }),
-    });
-  } catch { /* non-critical */ }
-}
-
-// ── Paddle price ID → tier mapping ───────────────────────────────────────────
 type DSTier = "solo" | "team" | "enterprise";
 
-const PRICE_TIERS: Record<string, DSTier> = {
-  [process.env.NEXT_PUBLIC_DS_SOLO_MONTHLY    || "pri_ds_solo_m"]:  "solo",
-  [process.env.NEXT_PUBLIC_DS_SOLO_QUARTERLY  || "pri_ds_solo_q"]:  "solo",
-  [process.env.NEXT_PUBLIC_DS_SOLO_BIANNUAL   || "pri_ds_solo_b"]:  "solo",
-  [process.env.NEXT_PUBLIC_DS_SOLO_YEARLY     || "pri_ds_solo_y"]:  "solo",
-  [process.env.NEXT_PUBLIC_DS_TEAM_MONTHLY    || "pri_ds_team_m"]:  "team",
-  [process.env.NEXT_PUBLIC_DS_TEAM_QUARTERLY  || "pri_ds_team_q"]:  "team",
-  [process.env.NEXT_PUBLIC_DS_TEAM_BIANNUAL   || "pri_ds_team_b"]:  "team",
-  [process.env.NEXT_PUBLIC_DS_TEAM_YEARLY     || "pri_ds_team_y"]:  "team",
-  [process.env.NEXT_PUBLIC_DS_ENT_MONTHLY     || "pri_ds_ent_m"]:   "enterprise",
-  [process.env.NEXT_PUBLIC_DS_ENT_YEARLY      || "pri_ds_ent_y"]:   "enterprise",
+// Map Lemon Squeezy variant_id → tier
+const VARIANT_TIERS: Record<string, DSTier> = {
+  [process.env.NEXT_PUBLIC_DS_SOLO_MONTHLY   || "ls_ds_solo_m"]: "solo",
+  [process.env.NEXT_PUBLIC_DS_SOLO_QUARTERLY || "ls_ds_solo_q"]: "solo",
+  [process.env.NEXT_PUBLIC_DS_SOLO_BIANNUAL  || "ls_ds_solo_b"]: "solo",
+  [process.env.NEXT_PUBLIC_DS_SOLO_YEARLY    || "ls_ds_solo_y"]: "solo",
+  [process.env.NEXT_PUBLIC_DS_TEAM_MONTHLY   || "ls_ds_team_m"]: "team",
+  [process.env.NEXT_PUBLIC_DS_TEAM_QUARTERLY || "ls_ds_team_q"]: "team",
+  [process.env.NEXT_PUBLIC_DS_TEAM_BIANNUAL  || "ls_ds_team_b"]: "team",
+  [process.env.NEXT_PUBLIC_DS_TEAM_YEARLY    || "ls_ds_team_y"]: "team",
+  [process.env.NEXT_PUBLIC_DS_ENT_MONTHLY    || "ls_ds_ent_m"]:  "enterprise",
+  [process.env.NEXT_PUBLIC_DS_ENT_YEARLY     || "ls_ds_ent_y"]:  "enterprise",
 };
 
-function resolveTier(priceId: string, productName = ""): DSTier {
-  if (priceId && PRICE_TIERS[priceId]) return PRICE_TIERS[priceId];
-  const n = productName.toLowerCase();
+function resolveTier(variantId: string, variantName = "", productName = ""): DSTier {
+  if (variantId && VARIANT_TIERS[variantId]) return VARIANT_TIERS[variantId];
+  const n = `${variantName} ${productName}`.toLowerCase();
   if (n.includes("enterprise")) return "enterprise";
   if (n.includes("team"))       return "team";
   return "solo";
 }
 
-function generateLicense(
-  email: string, tier: DSTier,
-  saleId: string, subscriptionId = "",
-): DeepstrainLicense {
+function generateLicense(email: string, tier: DSTier, saleId: string, subscriptionId = ""): DeepstrainLicense {
   const now     = new Date();
   const expires = new Date(now.getTime() + LICENSE_DAYS * 86400000);
 
@@ -95,9 +70,21 @@ function generateLicense(
   return { ...payload, signature: sig };
 }
 
-async function persistLicense(
-  email: string, lic: DeepstrainLicense, sessionId?: string,
-): Promise<void> {
+async function notifyAdmin(subject: string, text: string): Promise<void> {
+  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM_EMAIL, to: [NOTIFY_EMAIL], subject,
+        html: `<pre style="font-family:monospace;font-size:14px">${text}</pre>`,
+      }),
+    });
+  } catch { /* non-critical */ }
+}
+
+async function persistLicense(email: string, lic: DeepstrainLicense, sessionId?: string): Promise<void> {
   await setDeepstrainLicense(email, lic);
   if (sessionId) await setDeepstrainActivation(sessionId, lic, 7200);
 }
@@ -118,10 +105,7 @@ async function sendLicenseEmail(
     enterprise: ["Everything in Team", "Priority support", "Custom onboarding"],
   };
 
-  const items = tierFeatures[tier]
-    .map((f) => `<li>✅ ${f}</li>`)
-    .join("");
-
+  const items = tierFeatures[tier].map((f) => `<li>✅ ${f}</li>`).join("");
   const activateCmd = tier === "solo"
     ? "deepstrain configure"
     : "deepstrain configure  # then: deepstrain mcp --http";
@@ -153,9 +137,8 @@ async function sendLicenseEmail(
       method:  "POST",
       headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
       body:    JSON.stringify({
-        from:        FROM_EMAIL,
-        to:          [toEmail],
-        subject:     isRenewal ? "deepstrain license renewed ✓" : "deepstrain license — ready to activate",
+        from: FROM_EMAIL, to: [toEmail],
+        subject: isRenewal ? "deepstrain license renewed ✓" : "deepstrain license — ready to activate",
         html,
         attachments: [{ filename: "deepstrain_license.json", content: b64 }],
       }),
@@ -164,92 +147,77 @@ async function sendLicenseEmail(
   } catch { return false; }
 }
 
-function verifyPaddleSignature(rawBody: string, header: string): boolean {
-  if (!PADDLE_SECRET || !header) return !PADDLE_SECRET;
-  try {
-    const parts   = Object.fromEntries(
-      header.split(";").map((p) => { const [k, v] = p.split("="); return [k, v]; }),
-    );
-    const signed   = `${parts.ts}:${rawBody}`;
-    const expected = crypto.createHmac("sha256", PADDLE_SECRET).update(signed).digest("hex");
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(parts.h1 || ""));
-  } catch { return false; }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") return res.status(200).json({ status: "ok", service: "deepstrain-webhook" });
   if (req.method !== "POST") return res.status(405).end();
 
   const rawBody   = await readRawBody(req);
-  const paddleSig = (req.headers["paddle-signature"] as string) || "";
-  if (PADDLE_SECRET && !verifyPaddleSignature(rawBody, paddleSig)) {
+  const signature = (req.headers["x-signature"] as string) || "";
+  if (LEMON_WEBHOOK_SECRET && !verifyLemonSignature(rawBody, signature)) {
     return res.status(401).json({ error: "invalid signature" });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const body: any  = JSON.parse(rawBody);
-  const eventType  = (body?.event_type as string) || "";
+  let body: any;
+  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: "bad json" }); }
+  const ev = parseLemonEvent(body);
 
   try {
-    if (eventType === "subscription.created") {
-      const sub     = body?.data ?? {};
-      const cust    = sub.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = sub.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const subId   = sub.id ?? "";
-      const session = sub.custom_data?.session as string | undefined;
-
-      const tier = resolveTier(priceId, prod);
-      const lic  = generateLicense(email, tier, subId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, tier, lic, false) : false;
-      await notifyAdmin(`[DEEPSTRAIN] New purchase — ${tier}`, `email: ${email}\nname: ${name}\ntier: ${tier}\nsub_id: ${subId}`);
+    // ── Issue / refresh ───────────────────────────────────────────────────────
+    if (isIssueEvent(ev.eventName)) {
+      const isNew = ev.eventName === "subscription_created";
+      const tier  = resolveTier(ev.variantId, ev.variantName, ev.productName);
+      const lic   = generateLicense(ev.email, tier, ev.orderId || ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic, isNew ? ev.session : undefined);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, tier, lic, !isNew) : false;
+      await notifyAdmin(
+        `[DEEPSTRAIN] ${isNew ? "New purchase" : "Renewal"} — ${tier}`,
+        `email: ${ev.email}\nname: ${ev.name}\ntier: ${tier}\nsub_id: ${ev.subscriptionId}`,
+      );
       return res.status(200).json({ ok: true, email_sent: sent, tier });
     }
 
-    if (["transaction.completed", "subscription.renewed"].includes(eventType)) {
-      const tx      = body?.data ?? {};
-      const cust    = tx.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = tx.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const txId    = tx.id ?? "";
-      const subId   = tx.subscription_id ?? "";
-      const session = tx.custom_data?.session as string | undefined;
+    // ── Tier change (variant changed mid-subscription) ────────────────────────
+    if (ev.eventName === "subscription_updated") {
+      if (ev.status === "expired") return res.status(200).json({ ok: true, action: "ignored_status", status: ev.status });
 
-      const tier = resolveTier(priceId, prod);
-      const lic  = generateLicense(email, tier, txId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, tier, lic, true) : false;
-      await notifyAdmin(`[DEEPSTRAIN] Renewal — ${tier}`, `email: ${email}\ntier: ${tier}\ntx_id: ${txId}`);
-      return res.status(200).json({ ok: true, email_sent: sent, tier });
-    }
-
-    if (eventType === "subscription.updated") {
-      const sub     = body?.data ?? {};
-      const cust    = sub.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = sub.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const subId   = sub.id ?? "";
-
-      const tier = resolveTier(priceId, prod);
-      const lic  = generateLicense(email, tier, subId, subId);
-      if (email) await persistLicense(email, lic, undefined);
-      const sent = email ? await sendLicenseEmail(email, name, tier, lic, true) : false;
-      await notifyAdmin(`[DEEPSTRAIN] Tier change → ${tier}`, `email: ${email}\nnew tier: ${tier}`);
+      const tier     = resolveTier(ev.variantId, ev.variantName, ev.productName);
+      const existing = ev.email ? await getDeepstrainLicense(ev.email) : null;
+      if (existing && existing.tier === tier) {
+        return res.status(200).json({ ok: true, action: "no_change", tier });
+      }
+      const lic = generateLicense(ev.email, tier, ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, tier, lic, true) : false;
+      await notifyAdmin(`[DEEPSTRAIN] Tier change → ${tier}`, `email: ${ev.email}\nnew tier: ${tier}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, action: "tier_change" });
     }
 
-    console.log(`[deepstrain-webhook] ignored: ${eventType}`);
-    return res.status(200).json({ ok: true, action: "ignored", event: eventType });
+    // ── Subscription truly ended → expire the license now ─────────────────────
+    if (isExpireEvent(ev.eventName)) {
+      if (ev.email) {
+        const existing = await getDeepstrainLicense(ev.email);
+        if (existing) {
+          const dead: DeepstrainLicense = { ...existing, expires_at: new Date().toISOString() };
+          const canonical = JSON.stringify(
+            Object.fromEntries(Object.entries(dead).filter(([k]) => k !== "signature").sort()),
+          ).replace(/\s/g, "");
+          dead.signature = crypto.createHmac("sha256", DS_SECRET).update(canonical).digest("hex");
+          await setDeepstrainLicense(ev.email, dead);
+        }
+      }
+      await notifyAdmin(`[DEEPSTRAIN] Expired`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "expired", email: ev.email });
+    }
+
+    // ── Cancelled but still paid until period end → keep, just log ────────────
+    if (ev.eventName === "subscription_cancelled") {
+      await notifyAdmin(`[DEEPSTRAIN] Cancelled (active until ${ev.endsAt || "period end"})`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "cancelled_grace", ends_at: ev.endsAt });
+    }
+
+    console.log(`[deepstrain-webhook] ignored: ${ev.eventName}`);
+    return res.status(200).json({ ok: true, action: "ignored", event: ev.eventName });
   } catch (err) {
     console.error("[deepstrain-webhook] error:", err);
     return res.status(500).json({ error: "internal error" });

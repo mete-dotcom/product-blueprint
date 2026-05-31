@@ -24,14 +24,14 @@
 
 ```
 Müşteri (tarayıcı)
-  │  /pricing → Paddle Checkout (client token + pri_xxx)
+  │  /pricing → Lemon Squeezy Checkout (lemon.js overlay + variant)
   ▼
-Paddle (Merchant of Record)
-  │  ödeme onayı → webhook (HMAC imzalı)
+Lemon Squeezy (Merchant of Record — bireysel satıcı, şirket gerekmez)
+  │  ödeme onayı → webhook (X-Signature HMAC imzalı)
   ▼
 POST /api/{product}/webhook
-  │  1. Paddle imzasını doğrula (paddle-signature header)
-  │  2. price_id → tier çöz
+  │  1. X-Signature doğrula (lib/lemonsqueezy.verifyLemonSignature)
+  │  2. variant_id → tier çöz
   │  3. HMAC-SHA256 imzalı lisans üret
   │  4. KV'ye yaz: {product}:lic:{email}
   │  5. custom_data.session varsa → {product}:act:{session} (TTL 7200s)
@@ -107,20 +107,27 @@ Ortak (ürün-bağımsız): `/api/register`, `/api/login`, `/api/verify`, `/api/
 
 ## 5. Webhook Deseni (çelik çekirdek)
 
+Sağlayıcı: **Lemon Squeezy** (MoR — bireysel satıcı, şirket gerekmez, Türk bankasına IBAN/Payoneer ile öder). Ortak mantık `src/lib/lemonsqueezy.ts`'de:
+
 ```ts
 export const config = { api: { bodyParser: false } };  // ham bytes ŞART (imza doğrulama)
 ```
 
 Akış:
-1. **Ham body oku** (`readRawBody`) — Paddle imzası tam byte üzerinden doğrulanır.
-2. **İmza doğrula** — `paddle-signature` header'ı `ts:body` → HMAC-SHA256 → `timingSafeEqual`.
-   Secret yoksa geçişe izin ver (`!PADDLE_SECRET`) — sadece kurulum/test için.
-3. **Olay yönlendir:** `subscription.created` · `transaction.completed` · `subscription.renewed` · `subscription.updated` · `subscription.canceled`.
-4. **price_id → tier** çöz (`PRICE_TIERS` map; fallback ürün adından).
-5. **Lisans üret** — aşağıdaki imza standardı.
-6. **Sakla** — `set{Product}License(email, lic)` + session varsa `set{Product}Activation`.
-7. **Email** — müşteriye lisans (Resend), admin'e bildirim (`notifyAdmin`).
-8. **Her zaman 200 dön** (ignored olaylar dahil) — Paddle retry fırtınasını önler.
+1. **Ham body oku** (`readRawBody`) — LS imzası tam byte üzerinden doğrulanır.
+2. **İmza doğrula** — `x-signature` header'ı = raw body'nin HMAC-SHA256'sı → `timingSafeEqual` (`verifyLemonSignature`). Secret yoksa geçişe izin ver (`!LEMON_WEBHOOK_SECRET`) — sadece kurulum/test için.
+3. **Olayı normalize et** (`parseLemonEvent`) → `{eventName, email, name, variantId, subscriptionId, status, session, ...}`.
+4. **Olay yönlendir:**
+   - `subscription_created` → yeni lisans
+   - `subscription_payment_success` → yenileme/tazeleme
+   - `subscription_updated` → variant değiştiyse tier değişimi
+   - `subscription_expired` → lisansı şimdi öldür (`expires_at = now`)
+   - `subscription_cancelled` → dönem sonuna kadar geçerli, ÖLDÜRME (35-gün penceresi doğal lapse)
+5. **variant_id → tier** çöz (`VARIANT_TIERS`/`VARIANT_MODULES` map; fallback variant/ürün adından).
+6. **Lisans üret** — aşağıdaki imza standardı.
+7. **Sakla** — `set{Product}License(email, lic)` + (yeni satışta) session varsa `set{Product}Activation`.
+8. **Email** — müşteriye lisans (Resend), admin'e bildirim (`notifyAdmin`).
+9. **Her zaman 200 dön** (ignored olaylar dahil) — LS retry fırtınasını önler.
 
 ### Lisans imza standardı (HMAC-SHA256)
 ```ts
@@ -214,15 +221,15 @@ DEEPSTRAIN_LICENSE_SECRET   ATLAS_LICENSE_SECRET   ADAUTO_LICENSE_SECRET
 DEEPSTRAIN_FROM_EMAIL   ATLAS_FROM_EMAIL   ADAUTO_FROM_EMAIL
 ```
 
-### Paddle
+### Lemon Squeezy
 ```
-PADDLE_WEBHOOK_SECRET            = pdl_ntfset_...  (webhook imza doğrulama, encrypted)
-NEXT_PUBLIC_PADDLE_CLIENT_TOKEN  = live_... | test_...
-NEXT_PUBLIC_PADDLE_SANDBOX       = true (sandbox testte) | false (production)
-NEXT_PUBLIC_PADDLE_ENV           = sandbox | production
+LEMON_WEBHOOK_SECRET             = (webhook imza doğrulama secret'ı, encrypted)
+LEMON_API_KEY                    = (opsiyonel — API ile checkout/abonelik yönetimi, encrypted)
+NEXT_PUBLIC_LEMON_STORE          = {store}.lemonsqueezy.com  (checkout buy URL'leri için)
 ```
 
-### Price ID'ler (`pri_xxx`, ürün+tier+dönem başına)
+### Variant ID'ler (LS numeric variant_id, ürün+tier+dönem başına)
+> Paddle `pri_xxx` yerine artık LS `variant_id` (sayısal). Env var ADLARI aynı kaldı.
 ```
 deepstrain: NEXT_PUBLIC_DS_{SOLO|TEAM}_{MONTHLY|QUARTERLY|BIANNUAL|YEARLY}
             NEXT_PUBLIC_DS_ENT_{MONTHLY|YEARLY}
@@ -232,19 +239,30 @@ adauto:     NEXT_PUBLIC_ADAUTO_PRO_{MONTHLY|YEARLY}
 
 ---
 
-## 10. Paddle Kurulumu (sandbox → production)
+## 10. Lemon Squeezy Kurulumu
 
-1. **Sandbox'ta başla:** sandbox-vendors.paddle.com (verification gerekmez).
-2. **Catalog → Products + Prices** → her tier/dönem için `pri_xxx` topla.
-3. **Notifications → destination** → `https://massiron.com/api/{product}/webhook`
-   (her ürün ayrı). Events: created/completed/renewed/updated/canceled. → secret al.
-4. **Authentication → Client-side token** al.
-5. Tüm değerleri Vercel env'e yaz.
-6. **Test kartı `4242 4242 4242 4242`** ile checkout → webhook → lisans → activate zinciri.
-7. Çalışınca: production hesabında 1-6'yı tekrarla, `NEXT_PUBLIC_PADDLE_SANDBOX=false`,
-   website verification (pricing/terms/privacy/refund URL'leri) tamamla.
+> **Neden LS (Paddle değil):** Paddle satıcı için kayıtlı şirket + KYB ister; Türkiye'de
+> şirketi olmayan birey Paddle'a giremez. Lemon Squeezy **bireysel satıcı** kabul eder,
+> MoR olarak KDV'yi halleder ve **Türk bankasına IBAN/Payoneer** ile öder. (Wise Mayıs
+> 2023'te Türkiye'den çıktı — Payoneer/IBAN kullan.)
 
-**Production verification için 4 sayfa zorunlu:** `/pricing` `/terms` `/privacy` `/refund`.
+1. **Hesap + store onayı:** app.lemonsqueezy.com → kayıt → store onay sürecini geç
+   (ürün örnekleri/demo + website URL paylaş; massiron.com + PyPI linkleri yeterli).
+2. **Products → New** → her ürün için, her tier/dönem bir **variant**. Variant'ın
+   **numeric `variant_id`**'sini al (Settings/variant detayında) → Vercel env'e yaz.
+3. **Settings → Webhooks → +** → `https://massiron.com/api/{product}/webhook`
+   (her ürün ayrı). Events: `subscription_created`, `subscription_payment_success`,
+   `subscription_updated`, `subscription_cancelled`, `subscription_expired`.
+   → **Signing secret**'i al → `LEMON_WEBHOOK_SECRET`.
+4. **Checkout:** lemon.js overlay (`https://app.lemonsqueezy.com/js/lemon.js`).
+   Buy URL: `https://{store}.lemonsqueezy.com/buy/{variant}?checkout[custom][session]={uuid}&checkout[custom][product]={product}`.
+   `NEXT_PUBLIC_LEMON_STORE` ile store subdomain set edilir.
+5. Tüm değerleri Vercel env'e yaz (variant_id'ler + LEMON_WEBHOOK_SECRET + NEXT_PUBLIC_LEMON_STORE).
+6. **Test modu:** LS test mode → test kartı → checkout → webhook → lisans → activate zinciri.
+7. Çalışınca test mode kapat, canlıya al.
+
+**Store onayı için hazır olması gerekenler:** çalışan website (massiron.com), ürün
+sayfaları, `/terms` `/privacy` `/refund`. (Bunların hepsi mevcut.)
 
 ---
 
@@ -278,11 +296,12 @@ curl -s $SITE/api/register -X POST -H "Content-Type: application/json" \
   -d '{"email":"t@x.com","password":"test12345","name":"T"}'           # → success
 # 2. Tekrar kayıt → 409 "already registered"
 # 3. Login doğru/yanlış parola → token / 401
-# 4. Webhook simülasyonu (sandbox secret yokken)
+# 4. Webhook simülasyonu (LEMON_WEBHOOK_SECRET yokken — Lemon Squeezy formatı)
 curl -s $SITE/api/{product}/webhook -X POST -H "Content-Type: application/json" \
-  -d '{"event_type":"subscription.created","data":{"id":"sub_test",
-       "customer":{"email":"t@x.com","name":"T"},
-       "items":[{"price":{"id":"<pri_id>","product":{"name":"Pro"}}}]}}'  # → ok, tier
+  -d '{"meta":{"event_name":"subscription_created","custom_data":{"session":"s1"}},
+       "data":{"type":"subscriptions","id":"sub_test","attributes":{
+         "user_email":"t@x.com","user_name":"T","variant_id":"<variant_id>",
+         "variant_name":"Pro","product_name":"Pro","status":"active"}}}'      # → ok, tier
 # 5. activate-cli → imzalı lisans (200)
 # 6. session köprüsü: webhook custom_data.session → GET session?id=... → ready, sonra pending
 ```
@@ -292,4 +311,5 @@ Her yeni üründe bu 6 adım YEŞİL olmadan production'a geçme.
 ---
 
 *Bu belge yaşayan standarttır. Para/aktivasyonda yeni bir şey öğrenildikçe buraya işlenir.*
-*Son güncelleme: 2026-05-31 — Upstash geçişi, site.ts modülü, adauto webhook, tag-türevli sürüm fix.*
+*Son güncelleme: 2026-05-31 — **Paddle → Lemon Squeezy geçişi** (şirketsiz bireysel satıcı,*
+*Türk bankasına ödeme), Upstash geçişi, site.ts modülü, adauto webhook, tag-türevli sürüm fix.*

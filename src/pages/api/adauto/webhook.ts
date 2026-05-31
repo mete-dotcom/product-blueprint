@@ -1,7 +1,7 @@
 /**
  * POST /api/adauto/webhook
  *
- * Paddle webhook → adauto HMAC-signed license → KV + Resend email.
+ * Lemon Squeezy webhook → adauto HMAC-signed license → KV + Resend email.
  * adauto has a single paid tier ("pro"); everything else is "free".
  * If custom_data.session is present, also stores in adauto:act:{session}
  * so the CLI polling loop can pick it up immediately.
@@ -9,30 +9,34 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
-import { setAdautoLicense, setAdautoActivation } from "../../../lib/store";
+import { setAdautoLicense, setAdautoActivation, getAdautoLicense } from "../../../lib/store";
 import type { AdautoLicense } from "../../../lib/store";
 import { fromEmail, productUrl, SUPPORT_EMAIL } from "../../../lib/site";
+import {
+  readRawBody, verifyLemonSignature, parseLemonEvent,
+  isIssueEvent, isExpireEvent, LEMON_WEBHOOK_SECRET,
+} from "../../../lib/lemonsqueezy";
 
-// Disable Next.js body parsing — raw bytes needed for Paddle HMAC verification
+// Raw bytes required for Lemon Squeezy X-Signature verification
 export const config = { api: { bodyParser: false } };
 
-const AD_SECRET     = process.env.ADAUTO_LICENSE_SECRET || "adauto-dev-secret-do-not-use-in-production";
-const RESEND_KEY    = process.env.RESEND_API_KEY        || "";
-const FROM_EMAIL    = fromEmail("adauto");
-const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET || "";
-const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL  || "";
-const LICENSE_DAYS  = 35;
+const AD_SECRET    = process.env.ADAUTO_LICENSE_SECRET || "adauto-dev-secret-do-not-use-in-production";
+const RESEND_KEY   = process.env.RESEND_API_KEY        || "";
+const FROM_EMAIL   = fromEmail("adauto");
+const NOTIFY_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL  || "";
+const LICENSE_DAYS = 35;
 
 type ADTier = "free" | "pro";
 
-const PRICE_TIERS: Record<string, ADTier> = {
-  [process.env.NEXT_PUBLIC_ADAUTO_PRO_MONTHLY || "pri_adauto_pro_m"]: "pro",
-  [process.env.NEXT_PUBLIC_ADAUTO_PRO_YEARLY  || "pri_adauto_pro_y"]: "pro",
+// Map Lemon Squeezy variant_id → tier
+const VARIANT_TIERS: Record<string, ADTier> = {
+  [process.env.NEXT_PUBLIC_ADAUTO_PRO_MONTHLY || "ls_adauto_pro_m"]: "pro",
+  [process.env.NEXT_PUBLIC_ADAUTO_PRO_YEARLY  || "ls_adauto_pro_y"]: "pro",
 };
 
-function resolveTier(priceId: string, productName = ""): ADTier {
-  if (priceId && PRICE_TIERS[priceId]) return PRICE_TIERS[priceId];
-  return productName.toLowerCase().includes("pro") ? "pro" : "free";
+function resolveTier(variantId: string, variantName = "", productName = ""): ADTier {
+  if (variantId && VARIANT_TIERS[variantId]) return VARIANT_TIERS[variantId];
+  return `${variantName} ${productName}`.toLowerCase().includes("pro") ? "pro" : "free";
 }
 
 /** Deterministic ADTO-XXXXX-XXXXX-XXXXX-XXXXX key from email + sale_id. */
@@ -122,83 +126,77 @@ async function sendLicenseEmail(toEmail: string, toName: string, lic: AdautoLice
   } catch { return false; }
 }
 
-async function readRawBody(req: NextApiRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on("data", (c: Buffer) => chunks.push(c));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
-  });
-}
-
-function verifyPaddleSignature(rawBody: string, header: string): boolean {
-  if (!PADDLE_SECRET || !header) return !PADDLE_SECRET;
-  try {
-    const parts = Object.fromEntries(
-      header.split(";").map((p) => { const [k, v] = p.split("="); return [k, v]; }),
-    );
-    const signed   = `${parts.ts}:${rawBody}`;
-    const expected = crypto.createHmac("sha256", PADDLE_SECRET).update(signed).digest("hex");
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(parts.h1 || ""));
-  } catch { return false; }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") return res.status(200).json({ status: "ok", service: "adauto-webhook" });
   if (req.method !== "POST") return res.status(405).end();
 
   const rawBody   = await readRawBody(req);
-  const paddleSig = (req.headers["paddle-signature"] as string) || "";
-  if (PADDLE_SECRET && !verifyPaddleSignature(rawBody, paddleSig)) {
+  const signature = (req.headers["x-signature"] as string) || "";
+  if (LEMON_WEBHOOK_SECRET && !verifyLemonSignature(rawBody, signature)) {
     return res.status(401).json({ error: "invalid signature" });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const body: any  = JSON.parse(rawBody);
-  const eventType  = (body?.event_type as string) || "";
+  let body: any;
+  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: "bad json" }); }
+  const ev = parseLemonEvent(body);
 
   try {
-    if (eventType === "subscription.created") {
-      const sub     = body?.data ?? {};
-      const cust    = sub.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = sub.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const subId   = sub.id ?? "";
-      const session = sub.custom_data?.session as string | undefined;
-
-      const tier = resolveTier(priceId, prod);
-      const lic  = generateLicense(email, tier, subId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, lic, false) : false;
-      await notifyAdmin(`[ADAUTO] New purchase — ${tier}`, `email: ${email}\nname: ${name}\ntier: ${tier}\nkey: ${lic.key}\nsub_id: ${subId}`);
+    // ── Issue / refresh ───────────────────────────────────────────────────────
+    if (isIssueEvent(ev.eventName)) {
+      const isNew = ev.eventName === "subscription_created";
+      const tier  = resolveTier(ev.variantId, ev.variantName, ev.productName);
+      const lic   = generateLicense(ev.email, tier, ev.orderId || ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic, isNew ? ev.session : undefined);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, lic, !isNew) : false;
+      await notifyAdmin(
+        `[ADAUTO] ${isNew ? "New purchase" : "Renewal"} — ${tier}`,
+        `email: ${ev.email}\nname: ${ev.name}\ntier: ${tier}\nkey: ${lic.key}\nsub_id: ${ev.subscriptionId}`,
+      );
       return res.status(200).json({ ok: true, email_sent: sent, tier });
     }
 
-    if (["transaction.completed", "subscription.renewed"].includes(eventType)) {
-      const tx      = body?.data ?? {};
-      const cust    = tx.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = tx.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const txId    = tx.id ?? "";
-      const subId   = tx.subscription_id ?? "";
-      const session = tx.custom_data?.session as string | undefined;
+    // ── Tier change ───────────────────────────────────────────────────────────
+    if (ev.eventName === "subscription_updated") {
+      if (ev.status === "expired") return res.status(200).json({ ok: true, action: "ignored_status", status: ev.status });
 
-      const tier = resolveTier(priceId, prod);
-      const lic  = generateLicense(email, tier, txId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, lic, true) : false;
-      await notifyAdmin(`[ADAUTO] Renewal — ${tier}`, `email: ${email}\ntier: ${tier}\ntx_id: ${txId}`);
-      return res.status(200).json({ ok: true, email_sent: sent, tier });
+      const tier     = resolveTier(ev.variantId, ev.variantName, ev.productName);
+      const existing = ev.email ? await getAdautoLicense(ev.email) : null;
+      if (existing && existing.tier === tier) {
+        return res.status(200).json({ ok: true, action: "no_change", tier });
+      }
+      const lic = generateLicense(ev.email, tier, ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, lic, true) : false;
+      await notifyAdmin(`[ADAUTO] Tier change → ${tier}`, `email: ${ev.email}\nnew tier: ${tier}`);
+      return res.status(200).json({ ok: true, email_sent: sent, tier, action: "tier_change" });
     }
 
-    console.log(`[adauto-webhook] ignored: ${eventType}`);
-    return res.status(200).json({ ok: true, action: "ignored", event: eventType });
+    // ── Subscription truly ended → expire the license now ─────────────────────
+    if (isExpireEvent(ev.eventName)) {
+      if (ev.email) {
+        const existing = await getAdautoLicense(ev.email);
+        if (existing) {
+          const dead: AdautoLicense = { ...existing, expires_at: new Date().toISOString() };
+          const canonical = JSON.stringify(
+            Object.fromEntries(Object.entries(dead).filter(([k]) => k !== "signature").sort()),
+          ).replace(/\s/g, "");
+          dead.signature = crypto.createHmac("sha256", AD_SECRET).update(canonical).digest("hex");
+          await setAdautoLicense(ev.email, dead);
+        }
+      }
+      await notifyAdmin(`[ADAUTO] Expired`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "expired", email: ev.email });
+    }
+
+    // ── Cancelled but still paid until period end → keep, just log ────────────
+    if (ev.eventName === "subscription_cancelled") {
+      await notifyAdmin(`[ADAUTO] Cancelled (active until ${ev.endsAt || "period end"})`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "cancelled_grace", ends_at: ev.endsAt });
+    }
+
+    console.log(`[adauto-webhook] ignored: ${ev.eventName}`);
+    return res.status(200).json({ ok: true, action: "ignored", event: ev.eventName });
   } catch (err) {
     console.error("[adauto-webhook] error:", err);
     return res.status(500).json({ error: "internal error" });

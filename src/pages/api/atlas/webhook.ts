@@ -1,12 +1,10 @@
 /**
  * POST /api/atlas/webhook
  *
- * Paddle webhook → Atlas HMAC-signed license → KV + Resend email.
+ * Lemon Squeezy webhook → Atlas HMAC-signed license → KV + Resend email.
+ * Tier/modules are resolved from the Lemon Squeezy variant_id.
  * If custom_data.session is present, also stores in atlas:act:{session}
  * so the CLI polling loop can pick it up immediately.
- *
- * Raw body is buffered so the Paddle HMAC-SHA256 signature is verified
- * against the exact bytes Paddle sent (not re-serialized JSON).
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -14,49 +12,53 @@ import crypto from "crypto";
 import { setAtlasLicense, setAtlasActivation, getAtlasLicense } from "../../../lib/store";
 import type { AtlasLicense } from "../../../lib/store";
 import { fromEmail, productUrl, SUPPORT_EMAIL } from "../../../lib/site";
+import {
+  readRawBody, verifyLemonSignature, parseLemonEvent,
+  isIssueEvent, isExpireEvent, LEMON_WEBHOOK_SECRET,
+} from "../../../lib/lemonsqueezy";
 
-// Disable Next.js body parsing — we need the raw bytes for Paddle sig verification
+// Raw bytes required for Lemon Squeezy X-Signature verification
 export const config = { api: { bodyParser: false } };
 
-const ATLAS_SECRET  = process.env.ATLAS_LICENSE_SECRET  || "atlas-dev-secret-do-not-use-in-production";
-const RESEND_KEY    = process.env.RESEND_API_KEY         || "";
-const FROM_EMAIL    = fromEmail("atlas");
-const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET  || "";
-const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL   || "";
-const LICENSE_DAYS  = 35;
+const ATLAS_SECRET = process.env.ATLAS_LICENSE_SECRET || "atlas-dev-secret-do-not-use-in-production";
+const RESEND_KEY   = process.env.RESEND_API_KEY       || "";
+const FROM_EMAIL   = fromEmail("atlas");
+const NOTIFY_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL || "";
+const LICENSE_DAYS = 35;
 
 // Module lists aligned with /atlas/pricing.tsx tier definitions
 const MODULES_SOLO       = ["core", "system_map"];
 const MODULES_PRO        = ["core", "system_map", "risk_radar", "security_shield", "code_health", "signal_map", "atlas_mcp"];
 const MODULES_ENTERPRISE = [...MODULES_PRO, "decision_center", "ownership_map", "rewind", "what_if", "commit_guard"];
 
-const PRICE_MODULES: Record<string, string[]> = {
-  [process.env.NEXT_PUBLIC_ATLAS_SOLO_MONTHLY  || "pri_atlas_solo_m"]: MODULES_SOLO,
-  [process.env.NEXT_PUBLIC_ATLAS_SOLO_YEARLY   || "pri_atlas_solo_y"]: MODULES_SOLO,
-  [process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY   || "pri_atlas_pro_m"]:  MODULES_PRO,
-  [process.env.NEXT_PUBLIC_ATLAS_PRO_YEARLY    || "pri_atlas_pro_y"]:  MODULES_PRO,
-  [process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY   || "pri_atlas_ent_m"]:  MODULES_ENTERPRISE,
-  [process.env.NEXT_PUBLIC_ATLAS_ENT_YEARLY    || "pri_atlas_ent_y"]:  MODULES_ENTERPRISE,
+// Map Lemon Squeezy variant_id → module set
+const VARIANT_MODULES: Record<string, string[]> = {
+  [process.env.NEXT_PUBLIC_ATLAS_SOLO_MONTHLY || "ls_atlas_solo_m"]: MODULES_SOLO,
+  [process.env.NEXT_PUBLIC_ATLAS_SOLO_YEARLY  || "ls_atlas_solo_y"]: MODULES_SOLO,
+  [process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY  || "ls_atlas_pro_m"]:  MODULES_PRO,
+  [process.env.NEXT_PUBLIC_ATLAS_PRO_YEARLY   || "ls_atlas_pro_y"]:  MODULES_PRO,
+  [process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY  || "ls_atlas_ent_m"]:  MODULES_ENTERPRISE,
+  [process.env.NEXT_PUBLIC_ATLAS_ENT_YEARLY   || "ls_atlas_ent_y"]:  MODULES_ENTERPRISE,
 };
 
-function resolveModules(priceId: string, productName = ""): string[] {
-  if (priceId && PRICE_MODULES[priceId]) return PRICE_MODULES[priceId];
-  const n = productName.toLowerCase();
+function resolveModules(variantId: string, variantName = "", productName = ""): string[] {
+  if (variantId && VARIANT_MODULES[variantId]) return VARIANT_MODULES[variantId];
+  const n = `${variantName} ${productName}`.toLowerCase();
   if (n.includes("enterprise")) return MODULES_ENTERPRISE;
   if (n.includes("pro"))        return MODULES_PRO;
   return MODULES_SOLO;
 }
 
 function tierForModules(modules: string[]): string {
-  if (modules.includes("mesh_discovery") || modules.includes("commit_guard")) return "enterprise";
-  if (modules.includes("mcp_server")     || modules.length >= 6)              return "pro";
-  if (modules.length > 1)                                                      return "solo";
+  if (modules.includes("commit_guard")) return "enterprise";
+  if (modules.length >= 6)              return "pro";
+  if (modules.length > 1)               return "solo";
   return "free";
 }
 
 function generateLicense(
   email: string, modules: string[], tier: string,
-  saleId: string, subscriptionId = ""
+  saleId: string, subscriptionId = "",
 ): AtlasLicense {
   const now     = new Date();
   const expires = new Date(now.getTime() + LICENSE_DAYS * 86400000);
@@ -73,7 +75,7 @@ function generateLicense(
   };
 
   const canonical = JSON.stringify(
-    Object.fromEntries(Object.entries(payload).sort())
+    Object.fromEntries(Object.entries(payload).sort()),
   ).replace(/\s/g, "");
 
   const sig = crypto.createHmac("sha256", ATLAS_SECRET).update(canonical).digest("hex");
@@ -87,9 +89,7 @@ async function notifyAdmin(subject: string, text: string): Promise<void> {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [NOTIFY_EMAIL],
-        subject,
+        from: FROM_EMAIL, to: [NOTIFY_EMAIL], subject,
         html: `<pre style="font-family:monospace;font-size:14px">${text}</pre>`,
       }),
     });
@@ -103,7 +103,7 @@ async function persistLicense(email: string, lic: AtlasLicense, sessionId?: stri
 
 async function sendLicenseEmail(
   toEmail: string, toName: string, modules: string[],
-  lic: AtlasLicense, isRenewal: boolean
+  lic: AtlasLicense, isRenewal: boolean,
 ): Promise<boolean> {
   if (!RESEND_KEY) return false;
 
@@ -124,7 +124,7 @@ async function sendLicenseEmail(
   ${!isRenewal ? `
   <h3>Setup (2 steps)</h3>
   <ol>
-    <li><code style="background:#f1f5f9;padding:3px 7px;border-radius:4px">pip install code-atlas</code></li>
+    <li><code style="background:#f1f5f9;padding:3px 7px;border-radius:4px">pip install code-atlas-py</code></li>
     <li><code style="background:#f1f5f9;padding:3px 7px;border-radius:4px">atlas activate --email ${toEmail}</code></li>
   </ol>
   <p>Or place the attached <code>atlas_license.json</code> in <code>~/.atlas/</code>.</p>
@@ -142,8 +142,7 @@ async function sendLicenseEmail(
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: [toEmail],
+        from: FROM_EMAIL, to: [toEmail],
         subject: isRenewal ? "ATLAS license renewed ✓" : "ATLAS license — ready to install",
         html,
         attachments: [{ filename: "atlas_license.json", content: b64 }],
@@ -153,139 +152,82 @@ async function sendLicenseEmail(
   } catch { return false; }
 }
 
-async function readRawBody(req: NextApiRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    req.on("data", (c: Buffer) => chunks.push(c));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", reject);
-  });
-}
-
-function verifyPaddleSignature(rawBody: string, header: string): boolean {
-  if (!PADDLE_SECRET || !header) return !PADDLE_SECRET;
-  try {
-    const parts = Object.fromEntries(
-      header.split(";").map((p) => { const [k, v] = p.split("="); return [k, v]; })
-    );
-    const signed   = `${parts.ts}:${rawBody}`;
-    const expected = crypto.createHmac("sha256", PADDLE_SECRET).update(signed).digest("hex");
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(parts.h1 || ""));
-  } catch { return false; }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") return res.status(200).json({ status: "ok", service: "atlas-webhook" });
   if (req.method !== "POST") return res.status(405).end();
 
   const rawBody   = await readRawBody(req);
-  const paddleSig = (req.headers["paddle-signature"] as string) || "";
-  if (PADDLE_SECRET && !verifyPaddleSignature(rawBody, paddleSig)) {
+  const signature = (req.headers["x-signature"] as string) || "";
+  if (LEMON_WEBHOOK_SECRET && !verifyLemonSignature(rawBody, signature)) {
     return res.status(401).json({ error: "invalid signature" });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const body: any  = JSON.parse(rawBody);
-  const eventType  = (body?.event_type as string) || "";
+  let body: any;
+  try { body = JSON.parse(rawBody); } catch { return res.status(400).json({ error: "bad json" }); }
+  const ev = parseLemonEvent(body);
 
   try {
-    // ── New subscription (first payment) ────────────────────────────────────
-    if (eventType === "subscription.created") {
-      const sub     = body?.data ?? {};
-      const cust    = sub.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = sub.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const subId   = sub.id ?? "";
-      const session = sub.custom_data?.session as string | undefined;
-
-      const modules = resolveModules(priceId, prod);
+    // ── Issue / refresh (new subscription or successful renewal) ──────────────
+    if (isIssueEvent(ev.eventName)) {
+      const isNew   = ev.eventName === "subscription_created";
+      const modules = resolveModules(ev.variantId, ev.variantName, ev.productName);
       const tier    = tierForModules(modules);
-      const lic     = generateLicense(email, modules, tier, subId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, modules, lic, false) : false;
-      await notifyAdmin(`[ATLAS] New purchase — ${tier}`, `email: ${email}\nname: ${name}\ntier: ${tier}\nmodules: ${modules.join(", ")}\nsub_id: ${subId}`);
+      const lic     = generateLicense(ev.email, modules, tier, ev.orderId || ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic, isNew ? ev.session : undefined);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, modules, lic, !isNew) : false;
+      await notifyAdmin(
+        `[ATLAS] ${isNew ? "New purchase" : "Renewal"} — ${tier}`,
+        `email: ${ev.email}\nname: ${ev.name}\ntier: ${tier}\nmodules: ${modules.join(", ")}\nsub_id: ${ev.subscriptionId}`,
+      );
       return res.status(200).json({ ok: true, email_sent: sent, tier, modules });
     }
 
-    // ── Recurring renewal or one-time payment ────────────────────────────────
-    if (["transaction.completed", "subscription.renewed"].includes(eventType)) {
-      const tx      = body?.data ?? {};
-      const cust    = tx.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = tx.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const txId    = tx.id ?? "";
-      const subId   = tx.subscription_id ?? "";
-      const session = tx.custom_data?.session as string | undefined;
+    // ── Tier change (variant changed mid-subscription) ────────────────────────
+    if (ev.eventName === "subscription_updated") {
+      // A cancelled/expired status is handled by subscription_expired; ignore here.
+      if (ev.status === "expired") return res.status(200).json({ ok: true, action: "ignored_status", status: ev.status });
 
-      const modules = resolveModules(priceId, prod);
-      const tier    = tierForModules(modules);
-      const lic     = generateLicense(email, modules, tier, txId, subId);
-      if (email) await persistLicense(email, lic, session);
-      const sent = email ? await sendLicenseEmail(email, name, modules, lic, true) : false;
-      await notifyAdmin(`[ATLAS] Renewal — ${tier}`, `email: ${email}\ntier: ${tier}\ntx_id: ${txId}`);
-      return res.status(200).json({ ok: true, email_sent: sent, tier, modules });
-    }
-
-    // ── Tier change (upgrade/downgrade) ──────────────────────────────────────
-    // subscription.updated fires when Paddle changes the plan mid-cycle
-    if (eventType === "subscription.updated") {
-      const sub     = body?.data ?? {};
-      const cust    = sub.customer ?? {};
-      const email   = cust.email ?? "";
-      const name    = cust.name ?? "";
-      const items   = sub.items ?? [{}];
-      const priceId = items[0]?.price?.id ?? "";
-      const prod    = items[0]?.price?.product?.name ?? "";
-      const subId   = sub.id ?? "";
-
-      const modules = resolveModules(priceId, prod);
-      const tier    = tierForModules(modules);
-
-      // Only re-issue if the tier actually changed
-      const existing = email ? await getAtlasLicense(email) : null;
+      const modules  = resolveModules(ev.variantId, ev.variantName, ev.productName);
+      const tier     = tierForModules(modules);
+      const existing = ev.email ? await getAtlasLicense(ev.email) : null;
       if (existing && existing.tier === tier && existing.modules.join(",") === [...modules].sort().join(",")) {
         return res.status(200).json({ ok: true, action: "no_change", tier });
       }
-
-      const lic  = generateLicense(email, modules, tier, subId, subId);
-      if (email) await persistLicense(email, lic, undefined);
-      const sent = email ? await sendLicenseEmail(email, name, modules, lic, true) : false;
-      await notifyAdmin(`[ATLAS] Tier change → ${tier}`, `email: ${email}\nnew tier: ${tier}\nmodules: ${modules.join(", ")}`);
+      const lic = generateLicense(ev.email, modules, tier, ev.subscriptionId, ev.subscriptionId);
+      if (ev.email) await persistLicense(ev.email, lic);
+      const sent = ev.email ? await sendLicenseEmail(ev.email, ev.name, modules, lic, true) : false;
+      await notifyAdmin(`[ATLAS] Tier change → ${tier}`, `email: ${ev.email}\nnew tier: ${tier}\nmodules: ${modules.join(", ")}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, modules, action: "tier_change" });
     }
 
-    // ── Cancellation — mark license as expired immediately ──────────────────
-    if (eventType === "subscription.canceled") {
-      const sub   = body?.data ?? {};
-      const cust  = sub.customer ?? {};
-      const email = cust.email ?? "";
-      if (email) {
-        const existing = await getAtlasLicense(email);
+    // ── Subscription truly ended → expire the license now ─────────────────────
+    if (isExpireEvent(ev.eventName)) {
+      if (ev.email) {
+        const existing = await getAtlasLicense(ev.email);
         if (existing) {
-          const cancelled: AtlasLicense = {
-            ...existing,
-            expires_at: new Date().toISOString(),
-          };
-          // Re-sign with updated expiry
+          const cancelled: AtlasLicense = { ...existing, expires_at: new Date().toISOString() };
           const canonical = JSON.stringify(
-            Object.fromEntries(Object.entries({ ...cancelled, signature: undefined } as object).filter(([k]) => k !== "signature").sort())
+            Object.fromEntries(
+              Object.entries(cancelled).filter(([k]) => k !== "signature").sort(),
+            ),
           ).replace(/\s/g, "");
           cancelled.signature = crypto.createHmac("sha256", ATLAS_SECRET).update(canonical).digest("hex");
-          await setAtlasLicense(email, cancelled);
+          await setAtlasLicense(ev.email, cancelled);
         }
       }
-      await notifyAdmin(`[ATLAS] Cancelled`, `email: ${email}`);
-      return res.status(200).json({ ok: true, action: "cancelled", email });
+      await notifyAdmin(`[ATLAS] Expired`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "expired", email: ev.email });
     }
 
-    console.log(`[atlas-webhook] ignored: ${eventType}`);
-    return res.status(200).json({ ok: true, action: "ignored", event: eventType });
+    // ── Cancelled but still paid until period end → keep license, just log ────
+    if (ev.eventName === "subscription_cancelled") {
+      await notifyAdmin(`[ATLAS] Cancelled (active until ${ev.endsAt || "period end"})`, `email: ${ev.email}`);
+      return res.status(200).json({ ok: true, action: "cancelled_grace", ends_at: ev.endsAt });
+    }
+
+    console.log(`[atlas-webhook] ignored: ${ev.eventName}`);
+    return res.status(200).json({ ok: true, action: "ignored", event: ev.eventName });
   } catch (err) {
     console.error("[atlas-webhook] error:", err);
     return res.status(500).json({ error: "internal error" });
