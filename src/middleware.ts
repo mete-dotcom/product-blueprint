@@ -5,10 +5,10 @@
  * Uses an in-memory sliding-window counter per IP.
  *
  * Limits enforced:
- *   /api/*           — 60 req / 60s per IP  (general API)
- *   /api/*/webhook   — 30 req / 60s per IP  (payment webhooks)
- *   /api/*/activate* — 10 req / 60s per IP  (activation — brute-force target)
- *   /api/*/recovery* — 5  req / 60s per IP  (recovery keys — hardest target)
+ *   /api/:path       — 60 req / 60s per IP  (general API)
+ *   /api/:p/webhook  — 30 req / 60s per IP  (payment webhooks)
+ *   /api/:p/activate — 10 req / 60s per IP  (activation — brute-force target)
+ *   /api/:p/recovery — 5  req / 60s per IP  (recovery keys — hardest target)
  *
  * Additional protections:
  *   - Blocks requests with no User-Agent (bot traffic)
