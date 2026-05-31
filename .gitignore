@@ -1,7 +1,6 @@
-__pycache__/
-*.pyc
-.env
-*.egg-info/
-dist/
-build/
-.DS_Store
+.vercel
+.env*
+node_modules
+.next
+
+.vercel
