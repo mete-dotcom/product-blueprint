@@ -5,6 +5,7 @@ import {
   Package, Cpu, Lock, Cloud, Network, Users, Globe,
 } from "lucide-react";
 import { useState } from "react";
+import { useHiddenTiers } from "../lib/useHiddenTiers";
 
 declare global {
   interface Window { Paddle: any; }
@@ -99,6 +100,7 @@ const faqs = [
 export default function Pricing() {
   const [period, setPeriod] = useState<Period>("monthly");
 
+  const hidden   = useHiddenTiers("deepstrain");
   const d        = DISCOUNTS[period];
   const solo     = planRow(SOLO_BASE, "solo", d);
   const team     = planRow(TEAM_BASE, "team", d);
@@ -194,6 +196,7 @@ export default function Pricing() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
 
             {/* Solo card */}
+            {!hidden.has("solo") && (
             <div className="glass p-8 ring-1 ring-white/10 relative overflow-hidden">
               <div className="relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-400 text-xs font-mono mb-6">
@@ -232,8 +235,10 @@ export default function Pricing() {
                 </ul>
               </div>
             </div>
+            )}
 
             {/* Team card — highlighted */}
+            {!hidden.has("team") && (
             <div className="glass p-8 ring-2 ring-strain-500/40 shadow-2xl shadow-strain-500/10 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-strain-500/5 via-transparent to-deep-500/5" />
               {/* "Most popular" badge */}
@@ -279,6 +284,7 @@ export default function Pricing() {
                 </ul>
               </div>
             </div>
+            )}
           </div>
 
           {/* HTTP MCP call-out */}

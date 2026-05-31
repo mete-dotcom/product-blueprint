@@ -5,6 +5,7 @@ import {
   CheckCircle, Lock, Zap, BarChart3, Globe, ShieldCheck,
   Brain, ArrowRight, Sparkles,
 } from "lucide-react";
+import { useHiddenTiers } from "../../lib/useHiddenTiers";
 
 declare global { interface Window { Paddle: any } }
 
@@ -51,6 +52,7 @@ const STEPS = [
 
 export default function AdautoPricing() {
   const [period, setPeriod] = useState<Period>("monthly");
+  const hidden = useHiddenTiers("adauto");
 
   const proPrice = period === "monthly" ? BASE : Math.floor(BASE * 10);
   const paddleId = period === "monthly" ? PADDLE_IDS.pro_monthly : PADDLE_IDS.pro_yearly;
@@ -111,6 +113,7 @@ export default function AdautoPricing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-16 max-w-2xl mx-auto">
 
             {/* Free */}
+            {!hidden.has("free") && (
             <div className="rounded-xl border border-slate-700 bg-[hsl(215,60%,5%)] p-6 flex flex-col">
               <div className="mb-5">
                 <h2 className="font-mono font-bold text-lg text-white">Free</h2>
@@ -136,8 +139,10 @@ export default function AdautoPricing() {
                 pip install adauto
               </a>
             </div>
+            )}
 
             {/* Pro */}
+            {!hidden.has("pro") && (
             <div className="rounded-xl border border-[hsl(30,91%,55%)] bg-[hsl(215,60%,5%)] p-6 flex flex-col ring-1 ring-[hsl(30,91%,55%)] ring-opacity-40 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-mono px-3 py-0.5 rounded-full bg-[hsl(30,91%,55%)] text-black font-semibold">
                 most popular
@@ -179,6 +184,7 @@ export default function AdautoPricing() {
                 get pro <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
+            )}
 
           </div>
 

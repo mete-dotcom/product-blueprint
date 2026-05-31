@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import { useHiddenTiers } from "../../lib/useHiddenTiers";
 import {
   CheckCircle, Lock, Package, Map, BarChart2, Shield,
   Cpu, Radio, Brain, Users, RotateCcw, Zap, GitBranch,
@@ -139,6 +140,8 @@ function openPaddle(priceId: string) {
 
 export default function AtlasPricing() {
   const [period, setPeriod] = useState<Period>("monthly");
+  const hidden = useHiddenTiers("atlas");
+  const visibleTiers = TIERS.filter((t) => !hidden.has(t.id));
 
   return (
     <>
@@ -200,7 +203,7 @@ export default function AtlasPricing() {
 
           {/* ── Tier cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-            {TIERS.map((tier) => {
+            {visibleTiers.map((tier) => {
               const price = period === "monthly" ? tier.monthly : tier.yearly;
               const paddleId = period === "monthly" ? tier.paddleMonthly : tier.paddleYearly;
 
@@ -292,7 +295,7 @@ export default function AtlasPricing() {
                 <thead>
                   <tr className="border-b border-[hsl(215,40%,12%)]">
                     <th className="text-left px-4 py-3 text-slate-500 font-normal w-48">module</th>
-                    {TIERS.map((t) => (
+                    {visibleTiers.map((t) => (
                       <th key={t.id} className={`px-4 py-3 font-semibold text-center ${
                         t.id === "free" ? "text-slate-500" :
                         t.id === "solo" ? "text-cyan-400" :
@@ -314,7 +317,7 @@ export default function AtlasPricing() {
                         <span className="text-slate-600">{MOD_ICONS[mod]}</span>
                         {MOD_NAMES[mod]}
                       </td>
-                      {TIERS.map((tier) => (
+                      {visibleTiers.map((tier) => (
                         <td key={tier.id} className="px-4 py-3 text-center">
                           {tier.modules.includes(mod) ? (
                             <CheckCircle className="w-4 h-4 text-[hsl(192,91%,47%)] mx-auto" />
