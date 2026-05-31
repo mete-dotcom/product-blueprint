@@ -131,12 +131,12 @@ export default function Hub() {
   return (
     <>
       <Head>
-        <title>deepstrain · atlas · adauto — developer tools</title>
+        <title>massiron — the intelligence is the product. the model is just a driver.</title>
         <meta name="description"
-          content="Three tools for developers who ship: deepstrain autonomous AI agent, atlas deterministic code intelligence, and adauto developer marketing automation." />
-        <meta property="og:title" content="deepstrain · atlas · adauto" />
+          content="massiron builds the intelligence into the tools — deterministic understanding (atlas), autonomous execution (deepstrain), owned outright. Swap in any model, even a free local one. The result doesn't change. deepstrain · atlas · adauto." />
+        <meta property="og:title" content="massiron — the intelligence is the product" />
         <meta property="og:description"
-          content="autonomous execution runtime + deterministic code intelligence + developer marketing automation" />
+          content="The model is rented. The intelligence is forged. Three tools, one intelligence layer — runs on your machine, with any brain or none." />
         <style>{`html { scroll-behavior: smooth; }`}</style>
       </Head>
 
@@ -144,14 +144,16 @@ export default function Hub() {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
            style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
         <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 font-mono text-sm font-semibold select-none">
-            <span className="text-strain-500">▸</span>
-            <span className="gradient-text tracking-tight">deepstrain</span>
-            <span className="text-white/15 mx-1">·</span>
-            <span className="text-[hsl(220,91%,62%)] tracking-tight">ATLAS</span>
-            <span className="text-white/15 mx-1">·</span>
-            <span className="text-[hsl(30,91%,55%)] tracking-tight">ADAUTO</span>
-          </div>
+          <a href="#top" className="flex items-center gap-2 font-mono text-sm font-bold select-none">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="flex-shrink-0">
+              <rect x="2" y="3"    width="12" height="2.5" rx="1.25" fill="#22d3ee" />
+              <rect x="2" y="6.75" width="12" height="2.5" rx="1.25" fill="#6366f1" />
+              <rect x="2" y="10.5" width="12" height="2.5" rx="1.25" fill="#f59e0b" />
+            </svg>
+            <span className="tracking-tight" style={{ background: "linear-gradient(90deg,#22d3ee,#6366f1,#f59e0b)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+              massiron
+            </span>
+          </a>
           <div className="flex items-center gap-5">
             <a href="#deepstrain" className="text-xs font-mono text-slate-500 hover:text-strain-400 transition-colors">deepstrain</a>
             <a href="#atlas"      className="text-xs font-mono text-slate-500 hover:text-[hsl(220,91%,65%)] transition-colors">atlas</a>
@@ -166,7 +168,7 @@ export default function Hub() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════ BRAND HERO */}
-      <section className="relative flex flex-col items-center justify-center pt-14 overflow-hidden"
+      <section id="top" className="relative flex flex-col items-center justify-center pt-14 overflow-hidden"
                style={{ background: "#010d1a", minHeight: "100vh" }}>
         {/* grid */}
         <div className="absolute inset-0 opacity-[0.025]"
@@ -178,20 +180,30 @@ export default function Hub() {
              style={{ background: "radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)" }} />
 
         <div className="relative z-10 max-w-4xl mx-auto px-5 py-28 text-center w-full">
-          <p className="font-mono text-xs text-slate-600 tracking-[0.3em] uppercase mb-7">autonomous developer tools</p>
+          <p className="font-mono text-xs text-slate-600 tracking-[0.3em] uppercase mb-7">
+            massiron · the intelligence layer
+          </p>
 
           <h1 className="font-mono font-bold text-white mb-6 leading-[1.05] tracking-tighter"
               style={{ fontSize: "clamp(2.8rem, 6.5vw, 5.5rem)" }}>
-            three tools.<br />
-            <span className="text-white/40">zero compromise.</span>
+            the model is rented.<br />
+            <span style={{ background: "linear-gradient(90deg,#22d3ee,#6366f1,#f59e0b)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+              the intelligence is forged.
+            </span>
           </h1>
 
-          <p className="text-slate-400 font-mono text-sm max-w-xl mx-auto mb-3 leading-relaxed">
-            One runs your code autonomously. One maps everything you've built.
-            One automates your developer marketing.
+          <p className="text-slate-300 font-mono text-sm max-w-2xl mx-auto mb-3 leading-relaxed">
+            massiron builds the intelligence into the tools — not the model.
+            Deterministic understanding, autonomous execution, owned outright.
+            Swap in any brain, even a free local one. The frontier-grade result doesn&apos;t change —
+            you just stopped paying rent on it.
           </p>
           <p className="text-slate-600 font-mono text-xs max-w-md mx-auto mb-14">
-            all three live on your machine · your key, your data
+            your machine · your key · no token ceiling · any brain, or none
+          </p>
+
+          <p className="font-mono text-[11px] text-slate-700 tracking-[0.25em] uppercase mb-5">
+            one intelligence layer · three tools
           </p>
 
           {/* product chooser pills */}
@@ -1138,12 +1150,16 @@ python handoff.py        # exports session → injects context → opens chat`}<
       <footer className="py-8 border-t border-white/5" style={{ background: "#010d1a" }}>
         <div className="max-w-7xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-mono text-xs select-none">
-            <span className="text-strain-700">▸</span>
-            <span className="gradient-text font-semibold">deepstrain</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden>
+              <rect x="2" y="3"    width="12" height="2.5" rx="1.25" fill="#22d3ee" />
+              <rect x="2" y="6.75" width="12" height="2.5" rx="1.25" fill="#6366f1" />
+              <rect x="2" y="10.5" width="12" height="2.5" rx="1.25" fill="#f59e0b" />
+            </svg>
+            <span className="font-bold" style={{ background: "linear-gradient(90deg,#22d3ee,#6366f1,#f59e0b)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+              massiron
+            </span>
             <span className="text-white/15 mx-1">·</span>
-            <span className="text-[hsl(220,91%,55%)] font-bold">ATLAS</span>
-            <span className="text-white/15 mx-1">·</span>
-            <span className="text-[hsl(30,91%,55%)] font-bold">ADAUTO</span>
+            <span className="text-slate-600">deepstrain · atlas · adauto</span>
           </div>
           <div className="flex flex-wrap items-center gap-5 font-mono text-xs text-slate-700">
             <Link href="/deepstrain" className="hover:text-strain-400 transition-colors">deepstrain</Link>
@@ -1155,7 +1171,7 @@ python handoff.py        # exports session → injects context → opens chat`}<
             <Link href="/terms"      className="hover:text-slate-400 transition-colors">terms</Link>
           </div>
           <div className="font-mono text-xs text-slate-800">
-            © {new Date().getFullYear()} deepstrain · atlas · adauto
+            © {new Date().getFullYear()} massiron · forged on your machine
           </div>
         </div>
       </footer>
