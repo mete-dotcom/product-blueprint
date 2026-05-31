@@ -198,6 +198,11 @@ props = {
 
 ## 6. Lisanslama Akışı
 
+> 📘 **Tam standart:** Para → lisans → aktivasyon zincirinin çelikten, kanıtlanmış
+> implementasyonu için → **[PAYMENTS_AND_ACTIVATION.md](PAYMENTS_AND_ACTIVATION.md)**.
+> (Upstash KV, site.ts modülü, webhook deseni, session köprüsü, recovery key,
+> env var listesi, Paddle kurulumu, release/versiyon tuzağı, test checklist.)
+
 ```
 Kullanıcı → <product> configure
          → Tarayıcı açılır: https://deepstrain.vercel.app/buy?session=<uuid>
