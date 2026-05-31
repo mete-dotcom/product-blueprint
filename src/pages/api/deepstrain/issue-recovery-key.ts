@@ -7,7 +7,7 @@
  * Security:
  *   • Requires "Authorization: Bearer <RECOVERY_ADMIN_KEY>" header
  *   • Verifies the customer has an active DeepStrain license in KV
- *   • Rate-limited by Edge Middleware: /api/*/recovery* → 5 req/60s/IP
+ *   • Rate-limited by Edge Middleware: /api/:p/recovery* → 5 req/60s/IP
  *   • The key itself is HMAC-SHA256 signed — cannot be forged
  *
  * Request body (JSON):

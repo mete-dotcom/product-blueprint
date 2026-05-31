@@ -9,7 +9,7 @@
  *   • Single-use: KV record prevents replay attacks
  *   • 24h expiry window enforced
  *   • Email + sale_id must match what was signed — prevents key transfer
- *   • Rate-limited by Edge Middleware: /api/*/recovery* → 5 req/60s/IP
+ *   • Rate-limited by Edge Middleware: /api/:p/recovery* → 5 req/60s/IP
  *   • No admin key needed — the HMAC provides the security guarantee
  *
  * Request body (JSON):
