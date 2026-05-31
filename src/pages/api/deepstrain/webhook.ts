@@ -24,9 +24,26 @@ async function readRawBody(req: NextApiRequest): Promise<string> {
 
 const DS_SECRET     = process.env.DEEPSTRAIN_LICENSE_SECRET  || "ds-dev-secret-do-not-use-in-production";
 const RESEND_KEY    = process.env.RESEND_API_KEY              || "";
-const FROM_EMAIL    = process.env.DEEPSTRAIN_FROM_EMAIL       || "deepstrain <noreply@deepstrain.dev>";
+const FROM_EMAIL    = process.env.DEEPSTRAIN_FROM_EMAIL       || "deepstrain <noreply@massiron.com>";
 const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET       || "";
+const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL        || "";
 const LICENSE_DAYS  = 35;
+
+async function notifyAdmin(subject: string, text: string): Promise<void> {
+  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [NOTIFY_EMAIL],
+        subject,
+        html: `<pre style="font-family:monospace;font-size:14px">${text}</pre>`,
+      }),
+    });
+  } catch { /* non-critical */ }
+}
 
 // ── Paddle price ID → tier mapping ───────────────────────────────────────────
 type DSTier = "solo" | "team" | "enterprise";
@@ -188,6 +205,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic  = generateLicense(email, tier, subId, subId);
       if (email) await persistLicense(email, lic, session);
       const sent = email ? await sendLicenseEmail(email, name, tier, lic, false) : false;
+      await notifyAdmin(`[DEEPSTRAIN] New purchase — ${tier}`, `email: ${email}\nname: ${name}\ntier: ${tier}\nsub_id: ${subId}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier });
     }
 
@@ -207,6 +225,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic  = generateLicense(email, tier, txId, subId);
       if (email) await persistLicense(email, lic, session);
       const sent = email ? await sendLicenseEmail(email, name, tier, lic, true) : false;
+      await notifyAdmin(`[DEEPSTRAIN] Renewal — ${tier}`, `email: ${email}\ntier: ${tier}\ntx_id: ${txId}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier });
     }
 
@@ -224,6 +243,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic  = generateLicense(email, tier, subId, subId);
       if (email) await persistLicense(email, lic, undefined);
       const sent = email ? await sendLicenseEmail(email, name, tier, lic, true) : false;
+      await notifyAdmin(`[DEEPSTRAIN] Tier change → ${tier}`, `email: ${email}\nnew tier: ${tier}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, action: "tier_change" });
     }
 

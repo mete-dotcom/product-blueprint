@@ -19,8 +19,9 @@ export const config = { api: { bodyParser: false } };
 
 const ATLAS_SECRET  = process.env.ATLAS_LICENSE_SECRET  || "atlas-dev-secret-do-not-use-in-production";
 const RESEND_KEY    = process.env.RESEND_API_KEY         || "";
-const FROM_EMAIL    = process.env.ATLAS_FROM_EMAIL       || "ATLAS <noreply@atlas.tools>";
+const FROM_EMAIL    = process.env.ATLAS_FROM_EMAIL       || "ATLAS <noreply@massiron.com>";
 const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET  || "";
+const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL   || "";
 const LICENSE_DAYS  = 35;
 
 // Module lists aligned with /atlas/pricing.tsx tier definitions
@@ -76,6 +77,22 @@ function generateLicense(
 
   const sig = crypto.createHmac("sha256", ATLAS_SECRET).update(canonical).digest("hex");
   return { ...payload, signature: sig };
+}
+
+async function notifyAdmin(subject: string, text: string): Promise<void> {
+  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [NOTIFY_EMAIL],
+        subject,
+        html: `<pre style="font-family:monospace;font-size:14px">${text}</pre>`,
+      }),
+    });
+  } catch { /* non-critical */ }
 }
 
 async function persistLicense(email: string, lic: AtlasLicense, sessionId?: string): Promise<void> {
@@ -188,6 +205,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic     = generateLicense(email, modules, tier, subId, subId);
       if (email) await persistLicense(email, lic, session);
       const sent = email ? await sendLicenseEmail(email, name, modules, lic, false) : false;
+      await notifyAdmin(`[ATLAS] New purchase — ${tier}`, `email: ${email}\nname: ${name}\ntier: ${tier}\nmodules: ${modules.join(", ")}\nsub_id: ${subId}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, modules });
     }
 
@@ -209,6 +227,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic     = generateLicense(email, modules, tier, txId, subId);
       if (email) await persistLicense(email, lic, session);
       const sent = email ? await sendLicenseEmail(email, name, modules, lic, true) : false;
+      await notifyAdmin(`[ATLAS] Renewal — ${tier}`, `email: ${email}\ntier: ${tier}\ntx_id: ${txId}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, modules });
     }
 
@@ -236,6 +255,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const lic  = generateLicense(email, modules, tier, subId, subId);
       if (email) await persistLicense(email, lic, undefined);
       const sent = email ? await sendLicenseEmail(email, name, modules, lic, true) : false;
+      await notifyAdmin(`[ATLAS] Tier change → ${tier}`, `email: ${email}\nnew tier: ${tier}\nmodules: ${modules.join(", ")}`);
       return res.status(200).json({ ok: true, email_sent: sent, tier, modules, action: "tier_change" });
     }
 
@@ -259,6 +279,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           await setAtlasLicense(email, cancelled);
         }
       }
+      await notifyAdmin(`[ATLAS] Cancelled`, `email: ${email}`);
       return res.status(200).json({ ok: true, action: "cancelled", email });
     }
 

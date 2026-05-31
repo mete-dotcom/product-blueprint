@@ -9,7 +9,24 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { getUser, getDeepstrainLicense } from "../../../lib/store";
 
-const SECRET = process.env.DEEPSTRAIN_LICENSE_SECRET || "ds-dev-secret-do-not-use-in-production";
+const RESEND_KEY   = process.env.RESEND_API_KEY           || "";
+const NOTIFY_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL     || "";
+const FROM_EMAIL   = process.env.DEEPSTRAIN_FROM_EMAIL    || "deepstrain <noreply@massiron.com>";
+
+async function notifyAdmin(email: string, tier: string): Promise<void> {
+  if (!RESEND_KEY || !NOTIFY_EMAIL) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${RESEND_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: FROM_EMAIL, to: [NOTIFY_EMAIL],
+        subject: `[DEEPSTRAIN] Activation — ${tier}`,
+        html: `<pre>email: ${email}\ntier: ${tier}\ntime: ${new Date().toISOString()}</pre>`,
+      }),
+    });
+  } catch { /* non-critical */ }
+}
 
 function timingSafeCompare(a: string, b: string): boolean {
   const ba = Buffer.from(a.padEnd(64, "\0").slice(0, 64));
@@ -59,6 +76,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     });
   }
 
+  await notifyAdmin(normalizedEmail, lic.tier);
   return res.status(200).json({
     success: true,
     license: lic,
