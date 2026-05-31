@@ -679,7 +679,7 @@ export default function AtlasHome() {
               <Link href="/deepstrain"      className="hover:text-slate-400 transition-colors">deepstrain</Link>
               <Link href="/adauto"          className="hover:text-slate-400 transition-colors">adauto</Link>
               <Link href="/bundle"          className="hover:text-slate-400 transition-colors">bundle</Link>
-              <a href="mailto:support@atlas.tools" className="hover:text-slate-400 transition-colors">support</a>
+              <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
             </div>
             <div className="text-xs text-slate-800">© {new Date().getFullYear()} ATLAS</div>
           </div>

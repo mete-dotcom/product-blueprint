@@ -88,7 +88,7 @@ export default function AdautoActivate() {
   // ── Paddle checkout ───────────────────────────────────────────────────────
   function openCheckout(priceId: string) {
     if (!priceId) {
-      setError("Checkout unavailable — contact support@adauto.dev");
+      setError("Checkout unavailable — contact support@massiron.com");
       return;
     }
     const w = window as unknown as { Paddle?: { Checkout?: { open: (o: object) => void } } };
@@ -135,7 +135,7 @@ export default function AdautoActivate() {
           {(stage === "auth" || stage === "checking") && (
             <div className="bg-[#111118] border border-white/10 rounded-2xl p-6">
               <h2 className="text-white text-lg font-semibold mb-1">Sign in to activate</h2>
-              <p className="text-slate-400 text-sm mb-6">Enter your adauto.dev credentials</p>
+              <p className="text-slate-400 text-sm mb-6">Enter your massiron.com credentials</p>
               <form onSubmit={handleAuth} className="space-y-4">
                 <input
                   type="email" placeholder="you@example.com" value={email}

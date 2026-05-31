@@ -69,7 +69,7 @@ export default function Privacy() {
 
               <h2 className="text-xl font-semibold text-white mt-8">Contact</h2>
               <p>
-                Questions about this policy? Contact us at <a href="mailto:privacy@deepstrain.dev" className="text-strain-400 hover:text-strain-300 transition-colors">privacy@deepstrain.dev</a>.
+                Questions about this policy? Contact us at <a href="mailto:privacy@massiron.com" className="text-strain-400 hover:text-strain-300 transition-colors">privacy@massiron.com</a>.
               </p>
 
               <p className="text-sm text-gray-500 pt-4 border-t border-white/5">

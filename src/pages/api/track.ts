@@ -12,12 +12,13 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Redis } from "@upstash/redis";
+import { fromEmail } from "../../lib/site";
 
 const kv = new Redis({ url: process.env.UPSTASH_REDIS_REST_URL!, token: process.env.UPSTASH_REDIS_REST_TOKEN! });
 
 const RESEND_KEY    = process.env.RESEND_API_KEY          || "";
 const FOUNDER_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL    || "";
-const FROM_EMAIL    = process.env.ATLAS_FROM_EMAIL        || "noreply@atlas.tools";
+const FROM_EMAIL    = fromEmail("atlas");
 const HOURLY_CAP    = 8;
 
 // Paths that signal real buying intent

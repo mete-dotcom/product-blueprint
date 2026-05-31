@@ -732,7 +732,7 @@ function SectionCaseStudy() {
   const [copied, setCopied] = React.useState(false);
 
   const claudeMdUrl = "/CLAUDE.md";
-  const curlCmd = `curl -o CLAUDE.md https://deepstrain.dev/CLAUDE.md`;
+  const curlCmd = `curl -o CLAUDE.md https://massiron.com/CLAUDE.md`;
 
   const copyClaudeCmd = () => {
     navigator.clipboard.writeText(curlCmd);

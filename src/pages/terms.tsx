@@ -95,7 +95,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-white mb-4">9. Contact</h2>
               <p>
-                For questions about these terms, contact us at support@deepstrain.dev.
+                For questions about these terms, contact us at support@massiron.com.
               </p>
             </section>
           </div>

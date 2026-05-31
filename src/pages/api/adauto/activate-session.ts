@@ -9,6 +9,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { getUser, getAdautoLicense, setAdautoActivation } from "../../../lib/store";
+import { pricingUrl } from "../../../lib/site";
 
 function timingSafeCompare(a: string, b: string): boolean {
   const ba = Buffer.from(a.padEnd(64, "\0").slice(0, 64));
@@ -50,14 +51,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (!lic) {
     return res.status(200).json({
       status:      "needs_payment",
-      upgrade_url: "https://deepstrain.dev/adauto/pricing",
+      upgrade_url: pricingUrl("adauto"),
     });
   }
 
   if (new Date(lic.expires_at) < new Date()) {
     return res.status(200).json({
       status:      "expired",
-      upgrade_url: "https://deepstrain.dev/adauto/pricing",
+      upgrade_url: pricingUrl("adauto"),
     });
   }
 

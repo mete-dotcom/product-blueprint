@@ -299,7 +299,7 @@ export default function AdautoPricing() {
             <span>·</span>
             <Link href="/privacy"  className="hover:text-slate-400 transition-colors">privacy</Link>
             <span>·</span>
-            <a href="mailto:support@adauto.dev" className="hover:text-slate-400 transition-colors">support</a>
+            <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
           </div>
         </footer>
       </main>

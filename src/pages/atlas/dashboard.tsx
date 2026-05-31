@@ -362,7 +362,7 @@ export default function AtlasDashboard() {
           <span>·</span>
           <Link href="/atlas/docs"    className="hover:text-slate-400 transition-colors">docs</Link>
           <span>·</span>
-          <a href="mailto:support@atlas.tools" className="hover:text-slate-400 transition-colors">support</a>
+          <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
         </div>
       </footer>
     </>

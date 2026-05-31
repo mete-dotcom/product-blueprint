@@ -9,6 +9,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { setDeepstrainLicense, setDeepstrainActivation } from "../../../lib/store";
 import type { DeepstrainLicense } from "../../../lib/store";
+import { fromEmail, productUrl, SUPPORT_EMAIL } from "../../../lib/site";
 
 // Disable Next.js body parsing — raw bytes needed for Paddle HMAC verification
 export const config = { api: { bodyParser: false } };
@@ -24,7 +25,7 @@ async function readRawBody(req: NextApiRequest): Promise<string> {
 
 const DS_SECRET     = process.env.DEEPSTRAIN_LICENSE_SECRET  || "ds-dev-secret-do-not-use-in-production";
 const RESEND_KEY    = process.env.RESEND_API_KEY              || "";
-const FROM_EMAIL    = process.env.DEEPSTRAIN_FROM_EMAIL       || "deepstrain <noreply@massiron.com>";
+const FROM_EMAIL    = fromEmail("deepstrain");
 const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET       || "";
 const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL        || "";
 const LICENSE_DAYS  = 35;
@@ -142,8 +143,8 @@ async function sendLicenseEmail(
   <p style="color:#64748b;font-size:13px">Valid until: ${expires} · tier: ${tier}</p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
   <p style="color:#94a3b8;font-size:12px">
-    Support: <a href="mailto:support@deepstrain.dev">support@deepstrain.dev</a> ·
-    <a href="https://deepstrain.dev">deepstrain.dev</a>
+    Support: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> ·
+    <a href="${productUrl("deepstrain")}">${productUrl("deepstrain").replace(/^https?:\/\//, "")}</a>
   </p>
 </body></html>`;
 

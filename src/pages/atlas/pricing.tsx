@@ -358,7 +358,7 @@ export default function AtlasPricing() {
               bundle — save 20% →
             </Link>
             <Link href="/" className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">
-              deepstrain.dev →
+              massiron.com →
             </Link>
           </div>
         </div>
@@ -376,7 +376,7 @@ export default function AtlasPricing() {
             <span>·</span>
             <Link href="/terms" className="hover:text-slate-400 transition-colors">terms</Link>
             <span>·</span>
-            <a href="mailto:support@atlas.tools" className="hover:text-slate-400 transition-colors">support</a>
+            <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
           </div>
         </footer>
       </main>

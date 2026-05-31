@@ -8,10 +8,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { getUser, getDeepstrainLicense } from "../../../lib/store";
+import { pricingUrl, fromEmail } from "../../../lib/site";
 
 const RESEND_KEY   = process.env.RESEND_API_KEY           || "";
 const NOTIFY_EMAIL = process.env.FOUNDER_NOTIFY_EMAIL     || "";
-const FROM_EMAIL   = process.env.DEEPSTRAIN_FROM_EMAIL    || "deepstrain <noreply@massiron.com>";
+const FROM_EMAIL   = fromEmail("deepstrain");
 
 async function notifyAdmin(email: string, tier: string): Promise<void> {
   if (!RESEND_KEY || !NOTIFY_EMAIL) return;
@@ -64,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(402).json({
       success:     false,
       error:       "no active deepstrain subscription",
-      upgrade_url: "https://deepstrain.dev/pricing",
+      upgrade_url: pricingUrl("deepstrain"),
     });
   }
 
@@ -72,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(402).json({
       success:     false,
       error:       "deepstrain subscription expired",
-      upgrade_url: "https://deepstrain.dev/pricing",
+      upgrade_url: pricingUrl("deepstrain"),
     });
   }
 

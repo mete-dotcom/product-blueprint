@@ -13,13 +13,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { setAtlasLicense, setAtlasActivation, getAtlasLicense } from "../../../lib/store";
 import type { AtlasLicense } from "../../../lib/store";
+import { fromEmail, productUrl, SUPPORT_EMAIL } from "../../../lib/site";
 
 // Disable Next.js body parsing — we need the raw bytes for Paddle sig verification
 export const config = { api: { bodyParser: false } };
 
 const ATLAS_SECRET  = process.env.ATLAS_LICENSE_SECRET  || "atlas-dev-secret-do-not-use-in-production";
 const RESEND_KEY    = process.env.RESEND_API_KEY         || "";
-const FROM_EMAIL    = process.env.ATLAS_FROM_EMAIL       || "ATLAS <noreply@massiron.com>";
+const FROM_EMAIL    = fromEmail("atlas");
 const PADDLE_SECRET = process.env.PADDLE_WEBHOOK_SECRET  || "";
 const NOTIFY_EMAIL  = process.env.FOUNDER_NOTIFY_EMAIL   || "";
 const LICENSE_DAYS  = 35;
@@ -131,8 +132,8 @@ async function sendLicenseEmail(
   <p style="color:#64748b;font-size:13px">Valid until: ${expires}</p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
   <p style="color:#94a3b8;font-size:12px">
-    Support: <a href="mailto:support@atlas.tools">support@atlas.tools</a> ·
-    <a href="https://atlas.tools">atlas.tools</a>
+    Support: <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> ·
+    <a href="${productUrl("atlas")}">${productUrl("atlas").replace(/^https?:\/\//, "")}</a>
   </p>
 </body></html>`;
 

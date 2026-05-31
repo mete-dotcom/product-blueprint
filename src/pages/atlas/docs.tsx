@@ -195,7 +195,7 @@ atlas --version             # print version`} />
                 <p className="text-xs text-slate-500 mt-1">52 tools · autonomous loops · MCP server · BYOK</p>
               </div>
               <Link href="/" className="flex items-center gap-1.5 text-xs font-mono text-[hsl(192,91%,47%)] hover:text-[hsl(192,91%,65%)] transition-colors flex-shrink-0">
-                deepstrain.dev <ArrowRight className="w-3 h-3" />
+                massiron.com <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -209,7 +209,7 @@ atlas --version             # print version`} />
             <span>·</span>
             <Link href="/atlas/pricing" className="hover:text-slate-400 transition-colors">pricing</Link>
             <span>·</span>
-            <a href="mailto:support@atlas.tools" className="hover:text-slate-400 transition-colors">support</a>
+            <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
           </div>
         </footer>
       </main>
