@@ -11,7 +11,7 @@
  *   • Single-use: consumed token hash stored in Vercel KV with 26h TTL
  *   • 24h validity window enforced in the key's embedded timestamp
  *   • Admin endpoint requires RECOVERY_ADMIN_KEY header
- *   • Rate limiting enforced by Edge Middleware (/api/*/recovery* → 5 req/60s/IP)
+ *   • Rate limiting enforced by Edge Middleware (/api/{product}/recovery* → 5 req/60s/IP)
  *   • Brute force impossible: key space ~256 bits
  *
  * Key anatomy:
