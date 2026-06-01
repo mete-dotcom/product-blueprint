@@ -8,6 +8,7 @@
 
 import Head from "next/head";
 import { useState } from "react";
+import { MassironNav } from "../../components/MassironNav";
 
 type Catalog = Record<string, string[]>;
 type Visibility = Record<string, boolean>;

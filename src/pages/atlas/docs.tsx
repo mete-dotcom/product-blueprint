@@ -2,6 +2,8 @@ import Head from "next/head";
 import Link from "next/link";
 import React, { useState } from "react";
 import { Copy, CheckCircle, ArrowRight } from "lucide-react";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 function CodeBlock({ code, lang = "bash" }: { code: string; lang?: string }) {
   const [copied, setCopied] = useState(false);
@@ -50,24 +52,15 @@ export default function AtlasDocs() {
   return (
     <>
       <Head>
-        <title>ATLAS Docs — Deterministic Code Intelligence</title>
+        <title>ATLAS Docs — massiron</title>
         <meta name="description" content="ATLAS usage guide — install, activate, scan, modules, MCP server, CLI reference." />
       </Head>
 
       <main className="min-h-screen bg-[hsl(215,60%,4%)] text-[hsl(210,40%,95%)] font-['Inter',sans-serif]">
 
-        {/* Nav */}
-        <nav className="border-b border-[hsl(215,40%,12%)] px-6 py-4 flex items-center justify-between max-w-6xl mx-auto sticky top-0 bg-[hsl(215,60%,4%)] z-10">
-          <div className="flex items-center gap-5">
-            <Link href="/atlas" className="text-sm text-slate-400 hover:text-white transition-colors font-mono">← atlas</Link>
-            <span className="text-xs font-mono text-slate-600 uppercase tracking-widest">docs</span>
-          </div>
-          <Link href="/atlas/pricing" className="text-xs font-mono px-3 py-1.5 rounded border border-[hsl(192,91%,47%)] text-[hsl(192,91%,47%)] hover:bg-[hsl(192,91%,47%)] hover:text-black transition-all">
-            get atlas →
-          </Link>
-        </nav>
+        <MassironNav activeProduct="atlas" />
 
-        <div className="max-w-6xl mx-auto px-6 py-12 flex gap-12">
+        <div className="max-w-6xl mx-auto px-6 py-12 pt-24 flex gap-12">
 
           {/* Sidebar */}
           <aside className="hidden lg:block w-44 flex-shrink-0 sticky top-20 self-start">
@@ -201,17 +194,7 @@ atlas --version             # print version`} />
           </div>
         </div>
 
-        <footer className="border-t border-[hsl(215,40%,12%)] py-8 px-6 text-center">
-          <div className="flex items-center justify-center gap-6 text-xs text-slate-600 font-mono">
-            <Link href="/" className="hover:text-slate-400 transition-colors">deepstrain</Link>
-            <span>·</span>
-            <Link href="/atlas" className="hover:text-slate-400 transition-colors text-slate-400">atlas</Link>
-            <span>·</span>
-            <Link href="/atlas/pricing" className="hover:text-slate-400 transition-colors">pricing</Link>
-            <span>·</span>
-            <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
-          </div>
-        </footer>
+        <MassironFooter />
       </main>
     </>
   );

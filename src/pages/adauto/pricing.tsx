@@ -6,6 +6,8 @@ import {
   Brain, ArrowRight, Sparkles,
 } from "lucide-react";
 import { useHiddenTiers } from "../../lib/useHiddenTiers";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 declare global { interface Window { Paddle: any } }
 
@@ -66,20 +68,9 @@ export default function AdautoPricing() {
 
       <main className="min-h-screen bg-[hsl(215,60%,4%)] text-[hsl(210,40%,95%)] font-['Inter',sans-serif]">
 
-        {/* ── Nav ── */}
-        <nav className="border-b border-[hsl(215,40%,12%)] px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center gap-6">
-            <Link href="/adauto" className="text-sm text-slate-400 hover:text-slate-200 transition-colors font-mono">
-              ← adauto
-            </Link>
-            <span className="text-xs font-mono text-slate-600 uppercase tracking-widest">pricing</span>
-          </div>
-          <Link href="/" className="text-xs text-slate-600 hover:text-slate-400 transition-colors font-mono">
-            all products →
-          </Link>
-        </nav>
+        <MassironNav activeProduct="adauto" />
 
-        <div className="max-w-5xl mx-auto px-6 py-16">
+        <div className="max-w-5xl mx-auto px-6 py-16 pt-28">
 
           {/* ── Header ── */}
           <div className="text-center mb-12">
@@ -292,22 +283,7 @@ export default function AdautoPricing() {
           </div>
         </div>
 
-        {/* ── Footer ── */}
-        <footer className="border-t border-[hsl(215,40%,12%)] py-8 px-6 text-center mt-4">
-          <div className="flex flex-wrap items-center justify-center gap-5 text-xs text-slate-600 font-mono">
-            <Link href="/"         className="hover:text-slate-400 transition-colors">deepstrain</Link>
-            <span>·</span>
-            <Link href="/atlas"    className="hover:text-slate-400 transition-colors">atlas</Link>
-            <span>·</span>
-            <Link href="/adauto"   className="hover:text-slate-400 transition-colors text-slate-400">adauto</Link>
-            <span>·</span>
-            <Link href="/bundle"   className="hover:text-slate-400 transition-colors">bundle</Link>
-            <span>·</span>
-            <Link href="/privacy"  className="hover:text-slate-400 transition-colors">privacy</Link>
-            <span>·</span>
-            <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
-          </div>
-        </footer>
+        <MassironFooter />
       </main>
     </>
   );

@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useState } from "react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import {
   Terminal, ChevronRight, Copy, CheckCircle,
   Zap, Shield, Code, Settings, Package,
@@ -1280,27 +1282,13 @@ export default function Docs() {
   return (
     <>
       <Head>
-        <title>docs — deepstrain</title>
+        <title>docs — massiron</title>
         <meta name="description" content="deepstrain documentation: installation, code integration, automation, tool catalog, CI/CD." />
       </Head>
 
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/70 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Terminal className="w-5 h-5 text-strain-400" />
-            <span className="font-bold tracking-tight text-white">
-              deep<span className="text-strain-400">strain</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-5">
-            <Link href="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors">pricing</Link>
-            <Link href="/activate" className="text-sm px-4 py-2 bg-strain-600 hover:bg-strain-500 text-white rounded-lg transition-colors">get started</Link>
-          </div>
-        </div>
-      </nav>
+      <MassironNav />
 
-      <div className="min-h-screen pt-16 bg-[#030712] flex">
+      <div className="min-h-screen pt-14 bg-[#030712] flex">
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 border-r border-white/5 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="p-4 pt-6">
@@ -1377,15 +1365,7 @@ export default function Docs() {
         </div>
       </div>
 
-      <footer className="py-6 border-t border-white/5 bg-[#030712]">
-        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-xs text-gray-700 font-mono">
-          <span>© {new Date().getFullYear()} deepstrain</span>
-          <div className="flex items-center gap-4">
-            <Link href="/pricing" className="hover:text-gray-500 transition-colors">pricing</Link>
-            <Link href="/atlas/docs" className="hover:text-gray-500 transition-colors">atlas docs</Link>
-          </div>
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }

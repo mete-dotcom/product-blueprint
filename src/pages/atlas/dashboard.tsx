@@ -8,6 +8,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 import {
   CheckCircle, XCircle, Clock, Copy, ExternalLink,
   Shield, Mail, AlertTriangle, RefreshCw, ArrowLeft,
@@ -134,20 +136,7 @@ export default function AtlasDashboard() {
         <meta name="description" content="Manage your ATLAS license" />
       </Head>
 
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between h-14">
-          <Link href="/atlas" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">A</div>
-            <span className="text-white font-semibold font-mono">atlas</span>
-          </Link>
-          <div className="flex items-center gap-6 text-sm font-mono text-slate-500">
-            <Link href="/atlas/pricing"    className="hover:text-white transition-colors">pricing</Link>
-            <Link href="/atlas/docs"       className="hover:text-white transition-colors">docs</Link>
-            <Link href="/atlas/activate"   className="hover:text-white transition-colors">activate</Link>
-          </div>
-        </div>
-      </nav>
+      <MassironNav activeProduct="atlas" />
 
       <main className="min-h-screen pt-20 pb-16 bg-[#0a0a0f] text-slate-100">
         <div className="max-w-3xl mx-auto px-6">
@@ -354,17 +343,7 @@ export default function AtlasDashboard() {
         </div>
       </main>
 
-      <footer className="border-t border-white/5 py-6 text-center">
-        <div className="flex items-center justify-center gap-5 text-xs text-slate-700 font-mono">
-          <Link href="/atlas"         className="hover:text-slate-400 transition-colors">atlas</Link>
-          <span>·</span>
-          <Link href="/atlas/pricing" className="hover:text-slate-400 transition-colors">pricing</Link>
-          <span>·</span>
-          <Link href="/atlas/docs"    className="hover:text-slate-400 transition-colors">docs</Link>
-          <span>·</span>
-          <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }

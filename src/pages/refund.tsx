@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Terminal, ArrowLeft } from "lucide-react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 
 export default function Refund() {
   return (
@@ -10,19 +12,9 @@ export default function Refund() {
       </Head>
 
       <div className="min-h-screen bg-deep-950">
-        {/* Header */}
-        <nav className="border-b border-white/5 bg-deep-950/80 backdrop-blur-xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Link href="/" className="flex items-center gap-2">
-                <Terminal className="w-6 h-6 text-strain-400" />
-                <span className="font-bold gradient-text">massiron</span>
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <MassironNav />
 
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 pt-24">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8">
             <ArrowLeft className="w-4 h-4" />
             Back to home
@@ -82,12 +74,7 @@ export default function Refund() {
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="py-8 border-t border-white/5 bg-deep-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
-            &copy; {new Date().getFullYear()} massiron. All rights reserved.
-          </div>
-        </footer>
+        <MassironFooter />
       </div>
     </>
   );

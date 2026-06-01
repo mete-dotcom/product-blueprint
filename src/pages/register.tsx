@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Mail, Lock, User, ArrowRight, AlertTriangle, Check } from "lucide-react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
@@ -39,7 +41,7 @@ export default function Register() {
   if (success) {
     return (
       <>
-        <Head><title>Account created — deepstrain</title></Head>
+        <Head><title>Account created — massiron</title></Head>
         <div className="min-h-screen flex items-center justify-center px-4"
              style={{ background: "#010d1a" }}>
           <div className="text-center max-w-sm">
@@ -61,26 +63,15 @@ export default function Register() {
   return (
     <>
       <Head>
-        <title>Create Account — deepstrain</title>
+        <title>Create Account — massiron</title>
       </Head>
 
       <div className="min-h-screen flex flex-col" style={{ background: "#010d1a" }}>
 
-        {/* Nav */}
-        <nav className="border-b border-white/5" style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
-          <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-1.5 font-mono text-sm font-semibold select-none">
-              <span className="text-strain-500">▸</span>
-              <span className="gradient-text tracking-tight">deepstrain</span>
-            </Link>
-            <Link href="/login" className="font-mono text-xs text-slate-500 hover:text-slate-300 transition-colors">
-              sign in →
-            </Link>
-          </div>
-        </nav>
+        <MassironNav />
 
         {/* Form */}
-        <div className="flex-1 flex items-center justify-center px-4 py-16">
+        <div className="flex-1 flex items-center justify-center px-4 py-16 pt-14">
           <div className="w-full max-w-sm">
 
             {/* Header */}
@@ -204,11 +195,7 @@ export default function Register() {
           </div>
         </div>
 
-        <footer className="py-6 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-5 text-center font-mono text-xs text-slate-800">
-            © {new Date().getFullYear()} deepstrain · atlas · adauto
-          </div>
-        </footer>
+        <MassironFooter />
       </div>
     </>
   );

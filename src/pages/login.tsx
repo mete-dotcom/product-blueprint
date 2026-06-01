@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Mail, Lock, ArrowRight, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 
 export default function Login() {
   const router = useRouter();
@@ -36,23 +38,12 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Sign In — deepstrain</title>
+        <title>Sign In — massiron</title>
       </Head>
 
-      <div className="min-h-screen flex flex-col" style={{ background: "#010d1a" }}>
+      <MassironNav />
 
-        {/* Nav */}
-        <nav className="border-b border-white/5" style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
-          <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-1.5 font-mono text-sm font-semibold select-none">
-              <span className="text-strain-500">▸</span>
-              <span className="gradient-text tracking-tight">deepstrain</span>
-            </Link>
-            <Link href="/register" className="font-mono text-xs text-slate-500 hover:text-slate-300 transition-colors">
-              create account →
-            </Link>
-          </div>
-        </nav>
+      <div className="min-h-screen flex flex-col pt-14" style={{ background: "#010d1a" }}>
 
         {/* Form */}
         <div className="flex-1 flex items-center justify-center px-4 py-16">
@@ -149,11 +140,7 @@ export default function Login() {
           </div>
         </div>
 
-        <footer className="py-6 border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-5 text-center font-mono text-xs text-slate-800">
-            © {new Date().getFullYear()} deepstrain · atlas · adauto
-          </div>
-        </footer>
+        <MassironFooter />
       </div>
     </>
   );

@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, Zap } from "lucide-react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import { useState } from "react";
 
 declare global { interface Window { Paddle: any } }
@@ -38,17 +40,9 @@ export default function Bundle() {
 
       <main className="min-h-screen bg-[#010d1a] text-[hsl(210,40%,95%)] font-['Inter',sans-serif]">
 
-        {/* Nav */}
-        <nav className="border-b border-white/5 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
-          <div className="flex items-center gap-5 font-mono text-sm">
-            <Link href="/" className="text-slate-400 hover:text-white transition-colors">deepstrain</Link>
-            <span className="text-slate-700">·</span>
-            <Link href="/atlas" className="text-slate-400 hover:text-white transition-colors">atlas</Link>
-          </div>
-          <span className="font-mono text-xs text-slate-600 uppercase tracking-widest">bundle</span>
-        </nav>
+        <MassironNav />
 
-        <div className="max-w-3xl mx-auto px-6 py-20">
+        <div className="max-w-3xl mx-auto px-6 py-20 pt-28">
 
           {/* Header */}
           <div className="text-center mb-14">
@@ -167,18 +161,7 @@ export default function Bundle() {
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="border-t border-white/5 py-8 px-6 text-center">
-          <div className="flex items-center justify-center gap-6 text-xs text-slate-700 font-mono">
-            <Link href="/" className="hover:text-slate-400 transition-colors">deepstrain</Link>
-            <span>·</span>
-            <Link href="/atlas" className="hover:text-slate-400 transition-colors">atlas</Link>
-            <span>·</span>
-            <Link href="/privacy" className="hover:text-slate-400 transition-colors">privacy</Link>
-            <span>·</span>
-            <Link href="/terms" className="hover:text-slate-400 transition-colors">terms</Link>
-          </div>
-        </footer>
+        <MassironFooter />
       </main>
     </>
   );

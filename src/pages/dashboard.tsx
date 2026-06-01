@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Terminal, Key, CheckCircle, XCircle, Clock, Copy, ExternalLink, Shield, Mail, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import { useState, useEffect } from "react";
 
 type LicenseInfo = {
@@ -120,29 +122,11 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Dashboard — DeepStrain</title>
+        <title>Dashboard — massiron</title>
         <meta name="description" content="Manage your DeepStrain license" />
       </Head>
 
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-deep-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <Terminal className="w-6 h-6 text-strain-400" />
-              <span className="text-xl font-bold text-white">DeepStrain</span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors">
-                Pricing
-              </Link>
-              <Link href="/docs" className="text-sm text-gray-400 hover:text-white transition-colors">
-                Docs
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <MassironNav />
 
       {/* Dashboard */}
       <section className="min-h-screen pt-24 pb-16 gradient-bg">
@@ -364,12 +348,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 border-t border-white/5 bg-deep-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
-          &copy; {new Date().getFullYear()} DeepStrain. All rights reserved.
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }

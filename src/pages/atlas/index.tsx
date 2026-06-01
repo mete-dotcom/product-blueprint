@@ -5,6 +5,8 @@ import {
   Radio, Brain, Users, RotateCcw, GitBranch, Zap,
   ArrowRight, CheckCircle, Package, Search, Activity,
 } from "lucide-react";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 const ATLAS_PRICE = process.env.NEXT_PUBLIC_ATLAS_PRICE || "19";
 const SYM         = "$";
@@ -152,26 +154,7 @@ export default function AtlasHome() {
 
       <div className="min-h-screen font-mono" style={{ background: "#010d1a", color: "#e2e8f0" }}>
 
-        {/* ── NAV ── */}
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-             style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
-          <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">← all products</Link>
-              <span className="text-white/10">|</span>
-              <span className="font-bold tracking-tight text-cyan-400 text-sm">ATLAS</span>
-            </div>
-            <div className="flex items-center gap-5">
-              <Link href="/atlas/pricing"   className="text-xs text-slate-500 hover:text-slate-300 transition-colors">pricing</Link>
-              <Link href="/atlas/docs"      className="text-xs text-slate-500 hover:text-slate-300 transition-colors">docs</Link>
-              <Link href="/atlas/dashboard" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">dashboard</Link>
-              <Link href="/atlas/pricing"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-slate-100 text-black text-xs font-semibold rounded-md transition-colors">
-                get atlas <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <MassironNav activeProduct="atlas" />
 
         {/* ── HERO ── */}
         <section className="relative pt-14 overflow-hidden" style={{ minHeight: "100vh" }}>
@@ -664,26 +647,7 @@ export default function AtlasHome() {
           </div>
         </section>
 
-        {/* ── FOOTER ── */}
-        <footer className="py-8 border-t border-white/5" style={{ background: "#010d1a" }}>
-          <div className="max-w-7xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs">
-              <Link href="/" className="text-slate-700 hover:text-slate-500 transition-colors">← home</Link>
-              <span className="text-slate-800 mx-1">|</span>
-              <span className="font-bold text-cyan-400">ATLAS</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-5 text-xs text-slate-700">
-              <Link href="/atlas/pricing"   className="hover:text-slate-400 transition-colors">pricing</Link>
-              <Link href="/atlas/docs"      className="hover:text-slate-400 transition-colors">docs</Link>
-              <Link href="/atlas/dashboard" className="hover:text-slate-400 transition-colors">dashboard</Link>
-              <Link href="/deepstrain"      className="hover:text-slate-400 transition-colors">deepstrain</Link>
-              <Link href="/adauto"          className="hover:text-slate-400 transition-colors">adauto</Link>
-              <Link href="/bundle"          className="hover:text-slate-400 transition-colors">bundle</Link>
-              <a href="mailto:support@massiron.com" className="hover:text-slate-400 transition-colors">support</a>
-            </div>
-            <div className="text-xs text-slate-800">© {new Date().getFullYear()} ATLAS</div>
-          </div>
-        </footer>
+        <MassironFooter />
 
       </div>
     </>

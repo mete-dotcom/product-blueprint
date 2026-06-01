@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Terminal, Users, Key, DollarSign, Shield, AlertTriangle, RefreshCw, ArrowLeft } from "lucide-react";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import { useState, useEffect } from "react";
 
 type AdminData = {
@@ -74,7 +76,7 @@ export default function Admin() {
     return (
       <>
         <Head>
-          <title>Admin — DeepStrain</title>
+          <title>Admin — massiron</title>
         </Head>
         <div className="min-h-screen bg-deep-950 flex items-center justify-center px-4">
           <div className="glass p-8 max-w-md w-full">
@@ -140,19 +142,16 @@ export default function Admin() {
   return (
     <>
       <Head>
-        <title>Admin Dashboard — DeepStrain</title>
+        <title>Admin Dashboard — massiron</title>
       </Head>
 
       <div className="min-h-screen bg-deep-950">
+        <MassironNav />
         {/* Header */}
-        <nav className="border-b border-white/5 bg-deep-950/80 backdrop-blur-xl">
+        <div className="border-b border-white/5 bg-deep-950/80 pt-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-4">
-                <Link href="/" className="flex items-center gap-2">
-                  <Terminal className="w-6 h-6 text-strain-400" />
-                  <span className="font-bold gradient-text">DeepStrain</span>
-                </Link>
                 <span className="text-sm px-3 py-1 bg-strain-600/20 text-strain-400 rounded-full font-medium">
                   Admin
                 </span>
@@ -165,7 +164,7 @@ export default function Admin() {
               </button>
             </div>
           </div>
-        </nav>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Cards */}
@@ -299,6 +298,7 @@ export default function Admin() {
           </div>
         </div>
       </div>
+      <MassironFooter />
     </>
   );
 }

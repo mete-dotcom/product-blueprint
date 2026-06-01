@@ -4,6 +4,8 @@ import {
   ArrowRight, Terminal, Cpu, Lock,
   Package, Zap, BookOpen, Activity,
 } from "lucide-react";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 const CTA      = process.env.NEXT_PUBLIC_DEEPSTRAIN_CTA      || "get deepstrain";
 const PRICE    = process.env.NEXT_PUBLIC_DEEPSTRAIN_PRICE    || "9";
@@ -51,26 +53,7 @@ export default function DeepstrainHome() {
         <meta name="description" content="Terminal-native AI agent. 52 tools, DeepSeek R1, compiled binary. No framework overhead." />
       </Head>
 
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-           style={{ background: "rgba(1,13,26,0.85)", backdropFilter: "blur(16px)" }}>
-        <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4 font-mono text-sm">
-            <Link href="/" className="text-slate-600 hover:text-slate-400 transition-colors text-xs">← all products</Link>
-            <span className="text-slate-700">|</span>
-            <span className="gradient-text font-semibold tracking-tight">deepstrain</span>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href="/deepstrain/docs"      className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">docs</Link>
-            <Link href="/deepstrain/pricing"   className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">pricing</Link>
-            <Link href="/deepstrain/dashboard" className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">dashboard</Link>
-            <Link href="/deepstrain/pricing"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-slate-100 text-black text-xs font-mono font-semibold rounded-md transition-colors">
-              {CTA} <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MassironNav activeProduct="deepstrain" />
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center pt-14 overflow-hidden"
@@ -536,25 +519,7 @@ export default function DeepstrainHome() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="py-8 border-t border-white/5" style={{ background: "#010d1a" }}>
-        <div className="max-w-6xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <Link href="/" className="text-slate-700 hover:text-slate-500 transition-colors">← home</Link>
-            <span className="text-slate-800 mx-1">|</span>
-            <span className="gradient-text font-semibold">deepstrain</span>
-          </div>
-          <div className="flex items-center gap-5 font-mono text-xs text-slate-700">
-            <Link href="/deepstrain/docs"      className="hover:text-slate-400 transition-colors">docs</Link>
-            <Link href="/deepstrain/pricing"   className="hover:text-slate-400 transition-colors">pricing</Link>
-            <Link href="/deepstrain/dashboard" className="hover:text-slate-400 transition-colors">dashboard</Link>
-            <Link href="/atlas"                className="hover:text-slate-400 transition-colors">atlas</Link>
-            <Link href="/bundle"               className="hover:text-slate-400 transition-colors">bundle</Link>
-            <Link href="/privacy"              className="hover:text-slate-400 transition-colors">privacy</Link>
-          </div>
-          <div className="font-mono text-xs text-slate-800">© {new Date().getFullYear()} deepstrain</div>
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }

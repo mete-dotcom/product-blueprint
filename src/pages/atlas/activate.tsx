@@ -12,6 +12,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 type Stage = "auth" | "checking" | "checkout" | "polling" | "done" | "error";
 
@@ -119,7 +121,8 @@ export default function AtlasActivate() {
           />
         )}
       </Head>
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+      <MassironNav activeProduct="atlas" />
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 pt-14">
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8">
@@ -261,6 +264,7 @@ export default function AtlasActivate() {
           )}
         </div>
       </div>
+      <MassironFooter />
     </>
   );
 }

@@ -5,6 +5,8 @@ import {
   Zap, GitBranch, Brain, RefreshCw, BookOpen,
   CheckCircle, Film, Globe, Activity,
 } from "lucide-react";
+import { MassironNav } from "../../components/MassironNav";
+import { MassironFooter } from "../../components/MassironFooter";
 
 const ADAUTO_PRICE = process.env.NEXT_PUBLIC_ADAUTO_PRICE || "12";
 const SYM          = "$";
@@ -90,26 +92,7 @@ export default function AdautoHome() {
           content="Local-first developer marketing automation. Generates posts, learns from engagement, requires human approval. $0.00034/post. pip install adauto." />
       </Head>
 
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-           style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
-        <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-mono text-sm select-none">
-            <span className="text-slate-600 text-xs">← all products</span>
-            <span className="text-white/15 mx-1">|</span>
-            <span className="font-bold tracking-tight" style={{ color: "hsl(30,91%,55%)" }}>adauto</span>
-          </Link>
-          <div className="flex items-center gap-5">
-            <Link href="/adauto/pricing"   className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">pricing</Link>
-            <Link href="/adauto/docs"      className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">docs</Link>
-            <Link href="/adauto/dashboard" className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">dashboard</Link>
-            <Link href="/adauto/pricing"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white hover:bg-slate-100 text-black text-xs font-mono font-semibold rounded-md transition-colors">
-              get adauto <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MassironNav activeProduct="adauto" />
 
       {/* ── HERO ── */}
       <section className="relative pt-14 overflow-hidden" style={{ background: "#010d1a", minHeight: "100vh" }}>
@@ -666,26 +649,7 @@ export default function AdautoHome() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="py-8 border-t border-white/5" style={{ background: "#010d1a" }}>
-        <div className="max-w-7xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <Link href="/" className="text-slate-700 hover:text-slate-500 transition-colors">← home</Link>
-            <span className="text-slate-800 mx-1">|</span>
-            <span className="font-bold" style={{ color: "hsl(30,91%,55%)" }}>adauto</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-5 font-mono text-xs text-slate-700">
-            <Link href="/adauto/pricing"   className="hover:text-slate-400 transition-colors">pricing</Link>
-            <Link href="/adauto/docs"      className="hover:text-slate-400 transition-colors">docs</Link>
-            <Link href="/adauto/dashboard" className="hover:text-slate-400 transition-colors">dashboard</Link>
-            <Link href="/atlas"            className="hover:text-slate-400 transition-colors">atlas</Link>
-            <Link href="/deepstrain"       className="hover:text-slate-400 transition-colors">deepstrain</Link>
-            <Link href="/bundle"           className="hover:text-slate-400 transition-colors">bundle</Link>
-            <Link href="/privacy"          className="hover:text-slate-400 transition-colors">privacy</Link>
-          </div>
-          <div className="font-mono text-xs text-slate-800">© {new Date().getFullYear()} adauto</div>
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }

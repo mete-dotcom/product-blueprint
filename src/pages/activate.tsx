@@ -1,6 +1,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import { useEffect, useRef, useState } from "react";
 import { Terminal, CheckCircle, ArrowRight, Zap, Shield, Lock, Eye, EyeOff } from "lucide-react";
 
@@ -130,24 +132,11 @@ export default function Activate() {
   return (
     <>
       <Head>
-        <title>activate deepstrain</title>
+        <title>activate deepstrain — massiron</title>
         <meta name="description" content="Activate your deepstrain professional license." />
       </Head>
 
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Terminal className="w-5 h-5 text-strain-400" />
-            <span className="font-bold tracking-tight text-white">
-              deep<span className="text-strain-400">strain</span>
-            </span>
-          </Link>
-          <Link href="/pricing" className="text-sm text-gray-400 hover:text-white transition-colors">
-            full pricing
-          </Link>
-        </div>
-      </nav>
+      <MassironNav />
 
       <section className="min-h-screen pt-24 pb-24 bg-[#030712] flex items-center justify-center relative overflow-hidden">
         {/* Background */}
