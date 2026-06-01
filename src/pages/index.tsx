@@ -1,5 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
+import { MassironNav } from "../components/MassironNav";
+import { MassironFooter } from "../components/MassironFooter";
 import {
   ArrowRight,
   Terminal,
@@ -141,31 +143,7 @@ export default function Hub() {
       </Head>
 
       {/* ════════════════════════════════════════════════════════════ NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-           style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}>
-        <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2 font-mono text-sm font-bold select-none">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden className="flex-shrink-0">
-              <rect x="2" y="3"    width="12" height="2.5" rx="1.25" fill="#22d3ee" />
-              <rect x="2" y="6.75" width="12" height="2.5" rx="1.25" fill="#6366f1" />
-              <rect x="2" y="10.5" width="12" height="2.5" rx="1.25" fill="#f59e0b" />
-            </svg>
-            <span className="tracking-tight" style={{ background: "linear-gradient(90deg,#22d3ee,#6366f1,#f59e0b)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-              massiron
-            </span>
-          </a>
-          <div className="flex items-center gap-5">
-            <a href="#deepstrain" className="text-xs font-mono text-slate-500 hover:text-strain-400 transition-colors">deepstrain</a>
-            <a href="#atlas"      className="text-xs font-mono text-slate-500 hover:text-[hsl(220,91%,65%)] transition-colors">atlas</a>
-            <a href="#adauto"     className="text-xs font-mono text-slate-500 hover:text-[hsl(30,91%,55%)] transition-colors">adauto</a>
-            <Link href="/docs"    className="text-xs font-mono text-slate-500 hover:text-slate-300 transition-colors">docs</Link>
-            <Link href="/bundle"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white text-xs font-mono rounded-md transition-colors">
-              bundle <span className="text-yellow-500/80">—20%</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MassironNav />
 
       {/* ═══════════════════════════════════════════════════════ BRAND HERO */}
       <section id="top" className="relative flex flex-col items-center justify-center pt-14 overflow-hidden"
@@ -1147,34 +1125,7 @@ python handoff.py        # exports session → injects context → opens chat`}<
       </section>
 
       {/* ════════════════════════════════════════════════════════ FOOTER */}
-      <footer className="py-8 border-t border-white/5" style={{ background: "#010d1a" }}>
-        <div className="max-w-7xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-mono text-xs select-none">
-            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden>
-              <rect x="2" y="3"    width="12" height="2.5" rx="1.25" fill="#22d3ee" />
-              <rect x="2" y="6.75" width="12" height="2.5" rx="1.25" fill="#6366f1" />
-              <rect x="2" y="10.5" width="12" height="2.5" rx="1.25" fill="#f59e0b" />
-            </svg>
-            <span className="font-bold" style={{ background: "linear-gradient(90deg,#22d3ee,#6366f1,#f59e0b)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-              massiron
-            </span>
-            <span className="text-white/15 mx-1">·</span>
-            <span className="text-slate-600">deepstrain · atlas · adauto</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-5 font-mono text-xs text-slate-700">
-            <Link href="/deepstrain" className="hover:text-strain-400 transition-colors">deepstrain</Link>
-            <Link href="/atlas"      className="hover:text-[hsl(220,91%,65%)] transition-colors">atlas</Link>
-            <Link href="/adauto"     className="hover:text-[hsl(30,91%,55%)] transition-colors">adauto</Link>
-            <Link href="/bundle"     className="hover:text-slate-400 transition-colors">bundle</Link>
-            <Link href="/docs"       className="hover:text-slate-400 transition-colors">docs</Link>
-            <Link href="/privacy"    className="hover:text-slate-400 transition-colors">privacy</Link>
-            <Link href="/terms"      className="hover:text-slate-400 transition-colors">terms</Link>
-          </div>
-          <div className="font-mono text-xs text-slate-800">
-            © {new Date().getFullYear()} massiron · forged on your machine
-          </div>
-        </div>
-      </footer>
+      <MassironFooter />
     </>
   );
 }
