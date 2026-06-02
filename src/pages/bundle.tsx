@@ -8,7 +8,7 @@ import { useState } from "react";
 declare global { interface Window { Paddle: any } }
 
 const DS_TEAM_PRICE   = Number(process.env.NEXT_PUBLIC_DEEPSTRAIN_TEAM_PRICE || "19");
-const ATLAS_PRO_PRICE = Number(process.env.NEXT_PUBLIC_ATLAS_PRICE || "19") * 2;
+const ATLAS_PRO_PRICE = Number(process.env.NEXT_PUBLIC_ATLAS_PRO_PRICE || "29");
 const DISCOUNT        = 0.20;
 const CURRENCY        = process.env.NEXT_PUBLIC_DEEPSTRAIN_CURRENCY || "USD";
 const SYM             = CURRENCY === "USD" ? "$" : CURRENCY;

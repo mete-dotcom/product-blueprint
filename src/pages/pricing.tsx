@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import {
   CheckCircle, ArrowRight, Zap, Shield,
-  Package, Cpu, Lock, Cloud, Network, Users, Globe,
+  Package, Cpu, Lock, Cloud, Network, Users, Globe, Terminal,
 } from "lucide-react";
 import { useState } from "react";
 import { useHiddenTiers } from "../lib/useHiddenTiers";
@@ -194,17 +194,18 @@ export default function Pricing() {
                   </span>
                   <span className="text-gray-400 text-base mb-2">/mo</span>
                 </div>
-                <p className="text-gray-500 text-sm mb-6 font-mono">
+                <p className="text-gray-500 text-sm mb-1 font-mono">
                   {period === "monthly"
                     ? "billed monthly — cancel anytime"
                     : `billed ${SYM}${solo.total} every ${d.months} months`}
                 </p>
+                <p className="text-strain-400 text-xs font-mono mb-6">1-day free trial — no card charge until day 2</p>
 
                 <button
                   onClick={() => handleCheckout("solo")}
                   className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white/10 hover:bg-white/15 text-white font-semibold rounded-xl transition-all duration-200 mb-8 group border border-white/10"
                 >
-                  get solo
+                  start free trial
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -243,17 +244,18 @@ export default function Pricing() {
                   </span>
                   <span className="text-gray-400 text-base mb-2">/mo per seat</span>
                 </div>
-                <p className="text-gray-500 text-sm mb-6 font-mono">
+                <p className="text-gray-500 text-sm mb-1 font-mono">
                   {period === "monthly"
                     ? "billed monthly — cancel anytime"
                     : `billed ${SYM}${team.total} every ${d.months} months`}
                 </p>
+                <p className="text-strain-400 text-xs font-mono mb-6">1-day free trial — no card charge until day 2</p>
 
                 <button
                   onClick={() => handleCheckout("team")}
                   className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 bg-strain-600 hover:bg-strain-500 text-white font-semibold rounded-xl transition-all duration-200 glow mb-8 group"
                 >
-                  get team
+                  start free trial
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
 

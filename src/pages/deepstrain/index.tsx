@@ -57,18 +57,18 @@ export default function DeepstrainHome() {
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center pt-14 overflow-hidden"
-               style={{ background: "#010d1a" }}>
+               style={{ background: "#0a0a0a" }}>
         <div className="absolute inset-0 opacity-[0.03]"
-             style={{ backgroundImage: "linear-gradient(rgba(34,211,238,1) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,1) 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
+             style={{ backgroundImage: "linear-gradient(#1e1e1e 1px,transparent 1px),linear-gradient(90deg,#1e1e1e 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full opacity-[0.04]"
-             style={{ background: "radial-gradient(circle, #06b6d4, transparent)" }} />
+             style={{ background: "radial-gradient(circle, #22c55e, transparent)" }} />
 
         <div className="relative z-10 max-w-6xl mx-auto px-5 py-24 grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-xs font-mono text-strain-600 tracking-[0.2em] uppercase mb-6">autonomous execution runtime</p>
             <h1 className="font-mono font-black leading-none tracking-tighter mb-6"
                 style={{ fontSize: "clamp(3rem, 7vw, 5.5rem)" }}>
-              <span className="gradient-text">deep</span><span className="text-white">strain</span>
+              <span style={{ color: "#22c55e" }}>deep</span><span className="text-white">strain</span>
             </h1>
             <div className="border border-white/5 rounded-lg overflow-hidden mb-8">
               {specs.map((s, i) => (
@@ -147,7 +147,7 @@ export default function DeepstrainHome() {
       </div>
 
       {/* TOOLS */}
-      <section className="py-24 border-t border-white/5" style={{ background: "#00080f" }}>
+      <section className="py-24 border-t border-white/5" style={{ background: "#0a0a0a" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="flex items-baseline gap-3 mb-12">
             <span className="font-mono text-xs text-strain-700 tracking-widest uppercase">// toolset</span>
@@ -179,7 +179,7 @@ export default function DeepstrainHome() {
       </section>
 
       {/* ARCHITECTURE */}
-      <section className="py-24 border-t border-white/5" style={{ background: "#010d1a" }}>
+      <section className="py-24 border-t border-white/5" style={{ background: "#0d0d0d" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="flex items-baseline gap-3 mb-12">
             <span className="font-mono text-xs text-strain-700 tracking-widest uppercase">// architecture</span>
@@ -212,7 +212,7 @@ export default function DeepstrainHome() {
       </section>
 
       {/* DEEPSEEK ENGINE */}
-      <section className="py-24 border-t border-white/5" style={{ background: "#010d1a" }}>
+      <section className="py-24 border-t border-white/5" style={{ background: "#0d0d0d" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="flex items-baseline gap-3 mb-3">
             <span className="font-mono text-xs text-strain-700 tracking-widest uppercase">// the engine</span>
@@ -353,7 +353,7 @@ export default function DeepstrainHome() {
       </section>
 
       {/* MCP — WORKS WITH ANY CHAT LLM */}
-      <section className="py-24 border-t border-white/5" style={{ background: "#00080f" }}>
+      <section className="py-24 border-t border-white/5" style={{ background: "#0a0a0a" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="flex items-baseline gap-3 mb-12">
             <span className="font-mono text-xs text-strain-700 tracking-widest uppercase">// mcp — your chat LLM</span>
@@ -459,7 +459,7 @@ export default function DeepstrainHome() {
       </section>
 
       {/* PRICING PREVIEW */}
-      <section className="py-24 border-t border-white/5" style={{ background: "#00080f" }}>
+      <section className="py-24 border-t border-white/5" style={{ background: "#0a0a0a" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="flex items-baseline gap-3 mb-12">
             <span className="font-mono text-xs text-strain-700 tracking-widest uppercase">// pricing</span>
@@ -495,7 +495,7 @@ export default function DeepstrainHome() {
       </section>
 
       {/* ATLAS CROSS-SELL */}
-      <section className="py-16 border-t border-white/5" style={{ background: "#00080f" }}>
+      <section className="py-16 border-t border-white/5" style={{ background: "#0a0a0a" }}>
         <div className="max-w-6xl mx-auto px-5">
           <div className="rounded-xl border border-white/8 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
                style={{ background: "rgba(255,255,255,0.015)" }}>

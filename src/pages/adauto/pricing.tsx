@@ -168,11 +168,13 @@ export default function AdautoPricing() {
                   </li>
                 ))}
               </ul>
+              <p className="text-[10px] font-mono mb-2 text-center" style={{ color: "#fb923c" }}>1-day free trial — cancel before day 2, pay nothing</p>
               <button
                 onClick={() => openPaddle(paddleId)}
-                className="w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 bg-[hsl(30,91%,55%)] text-black hover:bg-[hsl(30,91%,63%)]"
+                className="w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 text-black hover:opacity-90"
+                style={{ background: "linear-gradient(90deg,#f59e0b,#fb923c)" }}
               >
-                get pro <ArrowRight className="w-3.5 h-3.5" />
+                start free trial <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
             )}

@@ -18,8 +18,8 @@ export function MassironNav({ activeProduct = null }: MassironNavProps) {
   const link = (label: string, href: string, p: Product) => {
     const isActive = activeProduct === p;
     const colors: Record<NonNullable<Product>, string> = {
-      deepstrain: "text-cyan-400",
-      atlas:      "text-indigo-400",
+      deepstrain: "text-green-400",
+      atlas:      "text-cyan-400",
       adauto:     "text-amber-400",
     };
     const base = "text-xs font-mono transition-colors";
@@ -33,8 +33,8 @@ export function MassironNav({ activeProduct = null }: MassironNavProps) {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
-      style={{ background: "rgba(1,13,26,0.92)", backdropFilter: "blur(18px)" }}
+      className="fixed top-0 left-0 right-0 z-50"
+      style={{ background: "rgba(8,8,8,0.97)", backdropFilter: "blur(10px)", borderBottom: "1px solid #1e1e1e" }}
     >
       <div className="max-w-7xl mx-auto px-5 h-14 flex items-center justify-between">
         {/* Wordmark */}

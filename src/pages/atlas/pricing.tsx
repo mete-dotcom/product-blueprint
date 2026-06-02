@@ -104,8 +104,8 @@ const TIERS: Tier[] = [
     id: "pro",
     name: "Pro",
     badge: "most popular",
-    monthly: BASE * 2,
-    yearly: Math.floor(BASE * 2 * 10),
+    monthly: 29,
+    yearly: 290,
     modules: ["core", "system_map", "risk_radar", "security_shield", "code_health", "signal_map", "atlas_mcp"],
     paddleMonthly: PADDLE_IDS.pro_monthly,
     paddleYearly: PADDLE_IDS.pro_yearly,
@@ -116,8 +116,8 @@ const TIERS: Tier[] = [
   {
     id: "enterprise",
     name: "Enterprise",
-    monthly: BASE * 4,
-    yearly: Math.floor(BASE * 4 * 10),
+    monthly: 59,
+    yearly: 590,
     modules: [
       "core", "system_map", "risk_radar", "security_shield", "code_health",
       "signal_map", "atlas_mcp", "decision_center", "ownership_map", "rewind", "what_if", "commit_guard",
@@ -260,16 +260,19 @@ export default function AtlasPricing() {
                       pip install atlas-intel
                     </a>
                   ) : (
-                    <button
-                      onClick={() => openPaddle(paddleId)}
-                      className={`w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 ${
-                        tier.highlight
-                          ? "bg-[hsl(192,91%,47%)] text-black hover:bg-[hsl(192,91%,55%)]"
-                          : "border border-current text-slate-300 hover:text-white border-slate-600 hover:border-slate-400"
-                      }`}
-                    >
-                      get {tier.name.toLowerCase()} <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    <>
+                      <p className="text-[hsl(192,91%,47%)] text-[10px] font-mono mb-1.5 text-center">1-day free trial</p>
+                      <button
+                        onClick={() => openPaddle(paddleId)}
+                        className={`w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 ${
+                          tier.highlight
+                            ? "bg-[hsl(192,91%,47%)] text-black hover:bg-[hsl(192,91%,55%)]"
+                            : "border border-current text-slate-300 hover:text-white border-slate-600 hover:border-slate-400"
+                        }`}
+                      >
+                        start free trial <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </>
                   )}
                 </div>
               );

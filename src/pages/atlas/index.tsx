@@ -188,6 +188,11 @@ export default function AtlasHome() {
                     get atlas
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
+                  <Link href="/atlas/demo"
+                    className="inline-flex items-center gap-2 px-6 py-3 border border-cyan-400/30 hover:border-cyan-400/60 text-cyan-400 text-sm rounded-md transition-colors">
+                    <Activity className="w-4 h-4" />
+                    live report demo
+                  </Link>
                   <a href="https://pypi.org/project/atlas-intel/"
                      className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 hover:border-white/20 text-slate-300 text-sm rounded-md transition-colors">
                     <Terminal className="w-4 h-4" />
