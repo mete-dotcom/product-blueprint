@@ -38,7 +38,7 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 const steps = [
-  { n: "01", cmd: "pip install atlas-intel",                            note: "offline · LLM-free · 0 API calls" },
+  { n: "01", cmd: "pip install code-atlas-py",                          note: "offline · LLM-free · 0 API calls" },
   { n: "02", cmd: "atlas activate-file ~/Downloads/atlas_license.json", note: "license file from purchase email"  },
   { n: "03", cmd: "atlas scan .",                                       note: "→ atlas_report.html in seconds"    },
 ];
@@ -193,10 +193,10 @@ export default function AtlasHome() {
                     <Activity className="w-4 h-4" />
                     live report demo
                   </Link>
-                  <a href="https://pypi.org/project/atlas-intel/"
+                  <a href="https://pypi.org/project/code-atlas-py/"
                      className="inline-flex items-center gap-2 px-6 py-3 border border-white/10 hover:border-white/20 text-slate-300 text-sm rounded-md transition-colors">
                     <Terminal className="w-4 h-4" />
-                    pip install atlas-intel
+                    pip install code-atlas-py
                   </a>
                 </div>
 

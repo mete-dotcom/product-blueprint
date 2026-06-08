@@ -235,7 +235,7 @@ export default function AtlasDashboard() {
                 <h3 className="text-sm font-mono font-semibold text-white mb-4">quick start</h3>
                 <div className="space-y-2 font-mono text-xs">
                   {[
-                    { comment: "# install / upgrade", cmd: "pip install --upgrade atlas-intel" },
+                    { comment: "# install / upgrade", cmd: "pip install --upgrade code-atlas-py" },
                     { comment: "# activate (fetches license from server)", cmd: `atlas activate --email ${lic.email}` },
                     { comment: "# or place license file manually", cmd: "cp atlas_license.json ~/.atlas/" },
                     { comment: "# run a scan", cmd: "atlas scan ." },

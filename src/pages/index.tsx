@@ -100,7 +100,7 @@ export default function Hub() {
 
           {/* stat bar */}
           <div className="flex items-center justify-center gap-8 mb-12 font-mono text-xs text-[#3a3a3a]">
-            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-strain-500" /> 57 tools live</span>
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-strain-500" /> 52 tools live</span>
             <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> 0-token intelligence</span>
             <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> ethics-first</span>
           </div>
@@ -254,7 +254,7 @@ export default function Hub() {
               {[
                 { tier: "tier 1", title: "cloud brain", body: "Drop in a DeepSeek key → full autonomous agent loop at cloud speed.", color: "#22c55e" },
                 { tier: "tier 2", title: "local brain", body: "No cloud key? Point it at Ollama. Same agent, fully offline.", color: "#22d3ee" },
-                { tier: "tier 3", title: "no brain at all", body: "The MCP server + 51 tools still stand. Your existing LLM discovers and drives them.", color: "#f59e0b" },
+                { tier: "tier 3", title: "no brain at all", body: "The MCP server + 52 tools still stand. Your existing LLM discovers and drives them.", color: "#f59e0b" },
               ].map((t, i) => (
                 <div key={t.tier} className={`px-6 py-5 ${i < 2 ? "border-r border-[#1e1e1e]" : ""}`}
                      style={{ background: "#0d0d0d" }}>
@@ -452,7 +452,7 @@ export default function Hub() {
                 title="atlas — code intelligence"
                 accent="text-[#22d3ee]"
                 lines={[
-                  { prompt: true, text: "pip install atlas-intel && atlas scan .", color: "text-[#e2e8f0]" },
+                  { prompt: true, text: "pip install code-atlas-py && atlas scan .", color: "text-[#e2e8f0]" },
                   { text: "  [atlas] scanning 388 files...", color: "text-[#22d3ee20]" },
                   { text: "  ✓ core            → 1,999 symbols mapped", color: "text-[#22d3ee40]" },
                   { text: "  ✓ system_map      → 29,148 import edges", color: "text-[#22d3ee60]" },
@@ -560,7 +560,7 @@ export default function Hub() {
             {[
               { n: "0",         l: "posts without approval", col: "#f59e0b" },
               { n: "~$0.00034", l: "per post",               col: "#fb923c" },
-              { n: "3",         l: "platforms",              col: "#f59e0b" },
+              { n: "4",         l: "platforms",              col: "#f59e0b" },
               { n: "5",         l: "HTTP tools",             col: "#fb923c" },
             ].map((m, i) => (
               <div key={m.l} className={`py-6 px-6 text-center ${i < 3 ? "border-r border-[#2a1a08]" : ""}`}

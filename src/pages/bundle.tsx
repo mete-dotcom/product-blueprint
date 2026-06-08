@@ -7,23 +7,25 @@ import { useState } from "react";
 
 declare global { interface Window { Paddle: any } }
 
-const DS_TEAM_PRICE   = Number(process.env.NEXT_PUBLIC_DEEPSTRAIN_TEAM_PRICE || "19");
-const ATLAS_PRO_PRICE = Number(process.env.NEXT_PUBLIC_ATLAS_PRO_PRICE || "29");
+const DS_PRICE        = Number(process.env.NEXT_PUBLIC_DEEPSTRAIN_PRICE   || "9");
+const ATLAS_PRO_PRICE = Number(process.env.NEXT_PUBLIC_ATLAS_PRO_PRICE    || "12");
+const ADAUTO_PRICE    = Number(process.env.NEXT_PUBLIC_ADAUTO_PRICE       || "9");
 const DISCOUNT        = 0.20;
 const CURRENCY        = process.env.NEXT_PUBLIC_DEEPSTRAIN_CURRENCY || "USD";
 const SYM             = CURRENCY === "USD" ? "$" : CURRENCY;
 
-const BUNDLE_DS_PADDLE   = process.env.NEXT_PUBLIC_BUNDLE_DS_PADDLE   || "pri_bundle_ds_team";
-const BUNDLE_ATLAS_PADDLE = process.env.NEXT_PUBLIC_BUNDLE_ATLAS_PADDLE || "pri_bundle_atlas_pro";
+const BUNDLE_DS_PADDLE     = process.env.NEXT_PUBLIC_BUNDLE_DS_PADDLE     || "pri_bundle_ds";
+const BUNDLE_ATLAS_PADDLE  = process.env.NEXT_PUBLIC_BUNDLE_ATLAS_PADDLE  || "pri_bundle_atlas_pro";
+const BUNDLE_ADAUTO_PADDLE = process.env.NEXT_PUBLIC_BUNDLE_ADAUTO_PADDLE || process.env.NEXT_PUBLIC_ADAUTO_PRO_MONTHLY || "pri_bundle_adauto";
 
-const combined    = DS_TEAM_PRICE + ATLAS_PRO_PRICE;
+const combined    = DS_PRICE + ATLAS_PRO_PRICE + ADAUTO_PRICE;
 const bundlePrice = Math.floor(combined * (1 - DISCOUNT));
 const savings     = combined - bundlePrice;
 
 const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
 function openCheckout(variantIds: string[]) {
   if (typeof window === "undefined" || !variantIds[0]) return;
-  // LS: open deepstrain Team first — atlas Pro opens after in sequence
+  // LS: open deepstrain first — atlas + adauto open after in sequence
   window.location.href = `https://${LEMON_STORE}/buy/${variantIds[0]}?checkout[custom][product]=deepstrain&checkout[custom][bundle]=true`;
 }
 
@@ -33,8 +35,8 @@ export default function Bundle() {
   return (
     <>
       <Head>
-        <title>Bundle — deepstrain + ATLAS</title>
-        <meta name="description" content={`Get deepstrain Team + ATLAS Pro together and save ${Math.round(DISCOUNT * 100)}%.`} />
+        <title>Bundle — deepstrain + atlas + adauto</title>
+        <meta name="description" content={`Get deepstrain + atlas Pro + adauto Pro together and save ${Math.round(DISCOUNT * 100)}%.`} />
       </Head>
 
       <main className="min-h-screen bg-[#010d1a] text-[hsl(210,40%,95%)] font-['Inter',sans-serif]">
@@ -52,30 +54,32 @@ export default function Bundle() {
               <span className="text-[hsl(192,91%,47%)] font-mono">deepstrain</span>
               <span className="text-slate-600 mx-3 font-light">+</span>
               <span className="text-[hsl(192,91%,47%)] font-mono">atlas</span>
+              <span className="text-slate-600 mx-3 font-light">+</span>
+              <span className="text-[hsl(35,91%,57%)] font-mono">adauto</span>
             </h1>
             <p className="text-slate-400 text-sm max-w-xl mx-auto leading-relaxed">
-              Two independent products. One for AI-driven execution, one for deterministic analysis.
-              Together they cover the full engineering intelligence stack.
+              Three independent products. Understand your code, execute changes, ship what you build.
+              The full massiron engineering stack at 20% off.
             </p>
           </div>
 
           {/* Product cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
 
             {/* deepstrain */}
             <div className="rounded-xl border border-[hsl(192,60%,20%)] bg-[hsl(215,60%,5%)] p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="font-mono font-bold text-[hsl(192,91%,47%)]">deepstrain</span>
-                <span className="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-0.5 rounded">team</span>
+                <span className="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-0.5 rounded">pro</span>
               </div>
               <p className="text-xs text-slate-500 mb-4">AI engineering agent — autonomous execution runtime.</p>
               <ul className="space-y-1.5 text-xs text-slate-400">
                 {[
                   "52 engineering tools",
                   "MCP server (stdio + HTTP)",
-                  "LAN / VPN access · multi-client",
                   "deepstrain_eval — autonomous loops",
                   "local LLM support (Ollama, LM Studio)",
+                  "BYOK · HMAC offline token",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2">
                     <CheckCircle className="w-3 h-3 text-[hsl(192,91%,47%)] flex-shrink-0" />
@@ -84,8 +88,8 @@ export default function Bundle() {
                 ))}
               </ul>
               <div className="mt-5 pt-4 border-t border-white/5 font-mono text-sm">
-                <span className="text-slate-500 line-through text-xs">{SYM}{DS_TEAM_PRICE}/mo</span>
-                <span className="text-white font-bold ml-2">{SYM}{Math.floor(DS_TEAM_PRICE * (1 - DISCOUNT))}/mo</span>
+                <span className="text-slate-500 line-through text-xs">{SYM}{DS_PRICE}/mo</span>
+                <span className="text-white font-bold ml-2">{SYM}{Math.floor(DS_PRICE * (1 - DISCOUNT))}/mo</span>
               </div>
             </div>
 
@@ -115,6 +119,33 @@ export default function Bundle() {
                 <span className="text-white font-bold ml-2">{SYM}{Math.floor(ATLAS_PRO_PRICE * (1 - DISCOUNT))}/mo</span>
               </div>
             </div>
+
+            {/* adauto */}
+            <div className="rounded-xl border border-[hsl(35,60%,20%)] bg-[hsl(215,60%,5%)] p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-mono font-bold text-[hsl(35,91%,57%)]">adauto</span>
+                <span className="text-xs font-mono text-slate-500 border border-slate-700 px-2 py-0.5 rounded">pro</span>
+              </div>
+              <p className="text-xs text-slate-500 mb-4">Developer marketing automation — ethics-first, human-approved.</p>
+              <ul className="space-y-1.5 text-xs text-slate-400">
+                {[
+                  "4 platforms (Reddit, dev.to, X, HN)",
+                  "Engagement learning algorithm",
+                  "Ethics filter — hard rules",
+                  "Unlimited campaigns",
+                  "Human approval gate — always on",
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3 text-[hsl(35,91%,57%)] flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-5 pt-4 border-t border-white/5 font-mono text-sm">
+                <span className="text-slate-500 line-through text-xs">{SYM}{ADAUTO_PRICE}/mo</span>
+                <span className="text-white font-bold ml-2">{SYM}{Math.floor(ADAUTO_PRICE * (1 - DISCOUNT))}/mo</span>
+              </div>
+            </div>
           </div>
 
           {/* Bundle CTA */}
@@ -131,7 +162,7 @@ export default function Bundle() {
 
             {!started ? (
               <button
-                onClick={() => { setStarted(true); openCheckout([BUNDLE_DS_PADDLE, BUNDLE_ATLAS_PADDLE]); }}
+                onClick={() => { setStarted(true); openCheckout([BUNDLE_DS_PADDLE, BUNDLE_ATLAS_PADDLE, BUNDLE_ADAUTO_PADDLE]); }}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-[hsl(192,91%,47%)] text-black font-bold font-mono rounded-lg hover:bg-[hsl(192,91%,55%)] transition-colors text-sm"
               >
                 get the bundle <ArrowRight className="w-4 h-4" />
@@ -150,12 +181,14 @@ export default function Bundle() {
 
           {/* Clarification */}
           <div className="mt-8 text-center text-xs text-slate-600 font-mono leading-relaxed">
-            <p>deepstrain and ATLAS are independent products with separate licenses, pricing, and roadmaps.</p>
+            <p>Three independent products with separate licenses, pricing, and roadmaps.</p>
             <p className="mt-1">The bundle is a purchase convenience — not a merged product.</p>
             <p className="mt-1">
               <Link href="/pricing" className="text-slate-500 hover:text-slate-300 transition-colors">deepstrain pricing</Link>
               <span className="mx-2">·</span>
               <Link href="/atlas/pricing" className="text-slate-500 hover:text-slate-300 transition-colors">atlas pricing</Link>
+              <span className="mx-2">·</span>
+              <Link href="/adauto/pricing" className="text-slate-500 hover:text-slate-300 transition-colors">adauto pricing</Link>
             </p>
           </div>
         </div>

@@ -86,7 +86,7 @@ export default function AtlasDocs() {
 
             <Section id="install" title="install">
               <p>ATLAS ships as a Python package. Requires Python ≥ 3.10.</p>
-              <CodeBlock code="pip install atlas-intel" />
+              <CodeBlock code="pip install code-atlas-py" />
               <p>Verify:</p>
               <CodeBlock code="atlas --version" />
             </Section>

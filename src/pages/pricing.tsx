@@ -40,7 +40,7 @@ function planRow(monthlyPrice: number, yearlyPrice: number, period: Period) {
 // ── Feature lists ─────────────────────────────────────────────────────────────
 const soloFeatures = [
   { icon: <Package   className="w-4 h-4" />, text: "compiled binary — no source exposed" },
-  { icon: <Cpu       className="w-4 h-4" />, text: "51 engineering tools (read, grep, git, test…)" },
+  { icon: <Cpu       className="w-4 h-4" />, text: "52 engineering tools (read, grep, git, test…)" },
   { icon: <Terminal  className="w-4 h-4" />, text: "MCP server — stdio (Claude Code, Gemini Pro)" },
   { icon: <Network   className="w-4 h-4" />, text: "local LLM support (Ollama, LM Studio, llama.cpp)" },
   { icon: <Lock      className="w-4 h-4" />, text: "bring your own DeepSeek API key" },
@@ -327,7 +327,7 @@ export default function Pricing() {
                 </thead>
                 <tbody>
                   {[
-                    ["51 engineering tools",          true,  true],
+                    ["52 engineering tools",          true,  true],
                     ["deepstrain_eval (autonomous agent)", true, true],
                     ["MCP — stdio (local)",            true,  true],
                     ["local LLM (Ollama / LM Studio)", true,  true],

@@ -239,12 +239,12 @@ export default function AtlasPricing() {
                   {/* CTA */}
                   {price === 0 ? (
                     <a
-                      href="https://pypi.org/project/atlas-intel/"
+                      href="https://pypi.org/project/code-atlas-py/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full text-center text-xs font-mono py-2.5 rounded border border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200 transition-colors"
                     >
-                      pip install atlas-intel
+                      pip install code-atlas-py
                     </a>
                   ) : (
                     <>
@@ -325,7 +325,7 @@ export default function AtlasPricing() {
               License is verified offline via HMAC-SHA256. Monthly subscriptions auto-renew the license file.
             </p>
             <p className="text-[10px] text-slate-600 mt-3 font-mono">
-              atlas-intel v0.9.0 · HMAC-SHA256 · offline · no telemetry
+              code-atlas-py v0.12.0 · HMAC-SHA256 · offline · no telemetry
             </p>
           </div>
         </div>
