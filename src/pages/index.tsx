@@ -98,35 +98,48 @@ export default function Hub() {
 
         <div className="relative z-10 max-w-5xl mx-auto px-5 py-28 w-full">
 
-          {/* eyebrow */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-px flex-1 bg-[#1e1e1e]" />
-            <span className="font-mono text-[10px] text-[#2a2a2a] tracking-[0.4em] uppercase">massiron · the intelligence layer</span>
-            <div className="h-px flex-1 bg-[#1e1e1e]" />
+          {/* stat bar */}
+          <div className="flex items-center justify-center gap-8 mb-12 font-mono text-xs text-[#3a3a3a]">
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-strain-500" /> 57 tools live</span>
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> 0-token intelligence</span>
+            <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-orange-500" /> ethics-first</span>
           </div>
 
-          {/* headline */}
-          <h1 className="font-mono font-black text-center leading-[1.0] tracking-tighter mb-8"
+          {/* headline — benefit-first */}
+          <h1 className="font-mono font-black text-center leading-[1.0] tracking-tighter mb-6"
               style={{ fontSize: "clamp(2.6rem, 6vw, 5.5rem)" }}>
-            <span className="text-white">the model is rented.</span>
+            <span className="text-white">your coding agent,</span>
             <br />
             <span style={{
-              background: "linear-gradient(90deg, #22d3ee 0%, #6366f1 50%, #f59e0b 100%)",
+              background: "linear-gradient(90deg, #22c55e 0%, #22d3ee 50%, #f59e0b 100%)",
               WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent"
             }}>
-              the intelligence is forged.
+              supercharged.
             </span>
           </h1>
 
-          <p className="font-mono text-sm text-[#6a6a6a] text-center max-w-2xl mx-auto leading-relaxed mb-3">
-            massiron builds the intelligence into the tools — not the model.
-            Deterministic understanding, autonomous execution, owned outright.
-            Swap in any brain, even a free local one. The result doesn&apos;t change —
-            you just stopped paying rent on it.
+          <p className="font-mono text-sm text-[#6a6a6a] text-center max-w-2xl mx-auto leading-relaxed mb-4">
+            Stop burning your expensive assistant&apos;s quota on file reads and test loops.
+            <strong className="text-white"> deepstrain</strong> does the heavy lifting at 3&times; fewer turns.
+            <strong className="text-cyan-500"> atlas</strong> maps your code in seconds with zero LLM tokens.
+            <strong className="text-orange-500"> adauto</strong> ships what you build — on autopilot.
           </p>
           <p className="font-mono text-xs text-[#2a2a2a] text-center mb-16">
-            your machine · your key · no token ceiling · any brain, or none
+            pip install &middot; your machine &middot; your key &middot; any model &middot; no hidden costs
           </p>
+
+          {/* single CTA — buy deepstrain, get 3 tools */}
+          <div className="flex items-center justify-center gap-4 mb-16">
+            <Link href="/pricing"
+               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-strain-600 hover:bg-strain-500 text-white font-bold font-mono text-sm transition-all glow group">
+              try deepstrain &mdash; {SYM}{DS_PRICE}/mo
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/activate"
+               className="inline-flex items-center gap-2 px-6 py-4 rounded-xl border border-[#2a2a2a] hover:border-[#4a4a4a] text-[#6a6a6a] hover:text-white font-mono text-xs transition-all">
+              already a user? activate &rarr;
+            </Link>
+          </div>
 
           {/* product dispatch board */}
           <div className="border border-[#1e1e1e]" style={{ background: "#0d0d0d" }}>
@@ -141,29 +154,32 @@ export default function Hub() {
                   color:   "#22c55e",
                   dim:     "#0a2010",
                   price:   `${SYM}${DS_PRICE}/mo`,
-                  copy:    "Reads your codebase, edits files, runs tests, commits. Not a suggestion — an executor.",
+                  copy:    "Reads your codebase, edits files, runs tests, commits. 3× fewer turns than doing it yourself.",
+                  benefit: "faster",
                 },
                 {
                   href:    "#atlas",
                   num:     "02",
-                  name:    "ATLAS",
+                  name:    "atlas",
                   role:    "code intelligence",
                   signal:  "● deterministic",
                   color:   "#22d3ee",
                   dim:     "#0d0d0d",
                   price:   `from ${SYM}${ATLAS_PRICE}/mo`,
                   copy:    "Pure AST. No LLM, no guesses. Full dependency graph, risk map, security scan in 69s.",
+                  benefit: "cheaper",
                 },
                 {
                   href:    "#adauto",
                   num:     "03",
-                  name:    "ADAUTO",
+                  name:    "adauto",
                   role:    "marketing automation",
                   signal:  "● pending review",
                   color:   "#fb923c",
                   dim:     "#1a1000",
-                  price:   `free · pro ${SYM}${ADAUTO_PRICE}/mo`,
-                  copy:    "Generates posts. Learns from engagement. Nothing publishes without your approval.",
+                  price:   `free &middot; pro ${SYM}${ADAUTO_PRICE}/mo`,
+                  copy:    "Generates posts, learns from engagement, ethics-filtered. Nothing publishes without your approval.",
+                  benefit: "easier",
                 },
               ].map((p) => (
                 <a key={p.name} href={p.href}
@@ -178,17 +194,18 @@ export default function Hub() {
                   <p className="font-mono text-xs text-[#4a4a4a] leading-relaxed mb-5">{p.copy}</p>
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs text-white">{p.price}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#2a2a2a] group-hover:translate-x-1 group-hover:text-white transition-all" />
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] uppercase tracking-wider" style={{color: p.color}}>{p.benefit}</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#2a2a2a] group-hover:translate-x-1 group-hover:text-white transition-all" />
+                    </div>
                   </div>
-                  <div className="mt-4 h-0.5" style={{ background: p.name === "ADAUTO"
-                    ? "linear-gradient(90deg,#f59e0b80,#fb923c60,transparent)"
-                    : `linear-gradient(90deg, ${p.color}60, transparent)` }} />
+                  <div className="mt-4 h-0.5" style={{ background: `linear-gradient(90deg, ${p.color}60, transparent)` }} />
                 </a>
               ))}
             </div>
           </div>
 
-          <p className="font-mono text-[10px] text-[#1a2a3a] text-center mt-8">↓ scroll for details</p>
+          <p className="font-mono text-[10px] text-[#1a2a3a] text-center mt-8">&darr; scroll for details</p>
         </div>
       </section>
 
