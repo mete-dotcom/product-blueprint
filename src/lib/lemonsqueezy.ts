@@ -36,10 +36,11 @@ export async function readRawBody(req: NextApiRequest): Promise<string> {
 
 /**
  * Verify the Lemon Squeezy `X-Signature` header.
- * If no secret is configured, allow through (setup/test only).
+ * If no secret is configured, allow through only if NOT production
+ * (block forged webhooks in prod).
  */
 export function verifyLemonSignature(rawBody: string, signature: string): boolean {
-  if (!LEMON_WEBHOOK_SECRET || !signature) return !LEMON_WEBHOOK_SECRET;
+  if (!LEMON_WEBHOOK_SECRET) return process.env.NODE_ENV !== "production";
   try {
     const expected = crypto.createHmac("sha256", LEMON_WEBHOOK_SECRET).update(rawBody).digest("hex");
     const a = Buffer.from(expected, "utf-8");

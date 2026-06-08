@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
 import { Redis } from "@upstash/redis";
-import { getUser, setUser, getAllLicenses } from "../../lib/store";
+import { getUser, setUser, getAllLicenses, getDeepstrainLicense, setDeepstrainActivation } from "../../lib/store";
 
 const kv = new Redis({ url: process.env.UPSTASH_REDIS_REST_URL!, token: process.env.UPSTASH_REDIS_REST_TOKEN! });
 import type { User } from "../../lib/store";
@@ -80,14 +80,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const passwordOk  = safeCompare(inputHash, storedHash);
   if (!passwordOk) return res.status(401).json({ error: "Incorrect password" });
 
-  // Find active license
-  const allLicenses   = await getAllLicenses().catch(() => []);
-  const now           = new Date();
-  const activeLicense = allLicenses
-    .filter((l) => l.email === normalizedEmail && l.valid && new Date(l.expires) > now)
-    .sort((a, b) => b.issued.localeCompare(a.issued))[0] ?? null;
+  // Find active license — check deepstrain:lic namespace FIRST (v2 webhook path)
+  const now = new Date();
+  let activeTier: string | null = null;
+  let activeExpires: string | null = null;
 
-  if (!activeLicense) {
+  const dsLic = await getDeepstrainLicense(normalizedEmail).catch(() => null);
+  if (dsLic && new Date(dsLic.expires_at) > now) {
+    activeTier    = dsLic.tier;
+    activeExpires = dsLic.expires_at;
+  }
+
+  if (!activeExpires) {
+    // Fall back to legacy license: namespace (pre-v2 webhook)
+    const allLicenses = await getAllLicenses().catch(() => []);
+    const legacyLic   = allLicenses
+      .filter((l) => l.email === normalizedEmail && l.valid && new Date(l.expires) > now)
+      .sort((a, b) => b.issued.localeCompare(a.issued))[0] ?? null;
+    if (legacyLic) {
+      activeTier    = legacyLic.tier;
+      activeExpires = legacyLic.expires;
+    }
+  }
+
+  if (!activeTier || !activeExpires) {
     return res.status(200).json({ status: "needs_payment" });
   }
 
@@ -95,19 +111,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const payload: Record<string, string> = {
     activated_at:   new Date().toISOString(),
     customer_email: normalizedEmail,
-    expires:        activeLicense.expires,
-    tier:           activeLicense.tier,
+    expires:        activeExpires,
+    tier:           activeTier,
     version:        "1.0",
   };
   const signature = signPayload(payload);
 
   if (session && typeof session === "string" && /^[a-f0-9-]{8,64}$/.test(session)) {
     await kv.set(`activation:${session}`, { payload, signature }, { ex: 7200 }).catch(() => {});
+    // Also write into deepstrain:act namespace so /api/deepstrain/session finds it
+    if (dsLic) {
+      await setDeepstrainActivation(session, dsLic, 7200).catch(() => {});
+    }
   }
 
   return res.status(200).json({
     status:  "activated",
-    tier:    activeLicense.tier,
-    expires: activeLicense.expires,
+    tier:    activeTier,
+    expires: activeExpires,
   });
 }
