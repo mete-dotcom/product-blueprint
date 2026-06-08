@@ -462,4 +462,57 @@ Güncelleme sırası: `__init__.py` → `pyproject.toml` → `setup.cfg` → `po
 
 ---
 
+## 14. Site Redesign Planı
+
+> **Hedef:** massiron.com'u "cesur & iddialı" marka felsefesine taşımak — benefit-first, net product separation, güven → checkout.
+
+### 14.1 Mevcut Durum
+
+| Sayfa | Sorun |
+|-------|-------|
+| Ana sayfa (index.tsx) | Hero mesajı ürün faydasını değil, teknik özellikleri vurguluyor. "57 tools, 19 capability domains" → kullanıcı bunun ne işe yaradığını anlamıyor |
+| Pricing (pricing.tsx) | 4 period → LemonSqueezy'ye geçişle 2'ye düştü (iyi). Ama tier karşılaştırması yok — kullanıcı Solo/Team farkını göremiyor |
+| Docs (docs.tsx) | İçerik zayıf, çoğu placeholder. Kod örnekleri canlı terminal deneyimi sunmuyor |
+| Activate (activate.tsx) | İyi durumda (auth + checkout). Ama başarılı aktivasyon sonrası kullanıcıya net bir "sıradaki adım" gösterilmiyor |
+| Atlas (atlas/pricing.tsx) | deepstrain'den çok farklı değil — atlas'ın değer önermesi (0 LLM token, deterministik) yeterince ayrışmamış |
+| Adauto (adauto/pricing.tsx) | En zayıf sayfa. Adauto'nun ne yaptığı net değil |
+| Bundle (bundle.tsx) | İndirim mantığı iyi ama "neden 3'ü birden?" sorusuna cevap vermiyor |
+
+### 14.2 Değişiklik Sırası (Öncelik)
+
+**Phase 1 — Hafta 1: Ana Sayfa + Mesaj (En kritik)**
+
+1. **Hero'yu yeniden yaz:** "AI'nın çalıştırdığı AI" yerine "Your coding agent, supercharged — 10x faster, 100x cheaper" gibi benefit-first
+2. **3 ürünü net ayır:** deepstrain = "send your agent to do heavy lifting", atlas = "understand code before you change it", adauto = "ship what you build"
+3. **Social proof / trust signals:** "Used by X developers", "Processed Y million tokens" gibi metrikler
+4. **Tek CTA:** "Try deepstrain — $9/month, first day free" (şu an birden çok CTA var)
+
+**Phase 2 — Hafta 2: Pricing + Bundle**
+
+5. **Pricing karşılaştırma tablosu:** Tüm 3 ürünü yan yana gösteren tablo, her tier'da hangi özellikler var net
+6. **Bundle sayfası:** "Why buy all three?" — entegrasyon hikayesi anlat (deepstrain edits, atlas maps, adauto ships)
+7. **LemonSqueezy checkout'a geçiş:** Tüm pricing butonları direkt LS linki (zaten yapıldı kısmen)
+
+**Phase 3 — Hafta 3: Docs + Atlas/Adauto sayfaları**
+
+8. **Docs'u canlandır:** Her tool için 1-2 satırlık örnek, canlı terminal çıktısı gösterimi
+9. **Atlas sayfası:** "0 LLM tokens" vurgusu, karşılaştırma (without atlas vs with atlas)
+10. **Adauto sayfası:** Campaign gallery (deepstrain/atlas örnek kampanyaları), "set it and forget it" mesajı
+
+**Phase 4 — Hafta 4: Polisaj + Mobil**
+
+11. **Mobile responsiveness:** Tüm sayfaların mobil görünümü test edilecek
+12. **Loading states:** LemonSqueezy checkout yüklenirken skeleton screen
+13. **Micro-animations:** CTA hover, kart hover, geçiş animasyonları
+
+### 14.3 Teknik Notlar
+
+- **Mevcut stack:** Next.js (Pages Router), Tailwind CSS, inline SVG ikonlar, LemonSqueezy checkout
+- **Renk paleti:** Koyu tema (`#030712` bg, `#22c55e` strain-green), değişmeyecek
+- **Yeni bileşen ihtiyacı:** PricingComparison, ProductHero, BundleCalculator
+- **Ölçüm:** Google Analytics veya Plausible eklenebilir (opsiyonel)
+- **Dosyalar:** `src/pages/` altındaki her .tsx sayfası + `src/components/` altındaki Nav/Footer
+
+---
+
 *Bu doküman yaşayan bir standarttır. Yeni bir şey öğrendikçe buraya eklenir.*
