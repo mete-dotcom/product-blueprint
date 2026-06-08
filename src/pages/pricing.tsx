@@ -19,21 +19,22 @@ const TEAM_BASE  = Number(process.env.NEXT_PUBLIC_DEEPSTRAIN_TEAM_PRICE || "19")
 const CURRENCY   = process.env.NEXT_PUBLIC_DEEPSTRAIN_CURRENCY || "USD";
 const SYM        = CURRENCY === "USD" ? "$" : CURRENCY;
 
-type Period = "monthly" | "quarterly" | "biannual" | "yearly";
+type Period = "monthly" | "yearly";
 
-const DISCOUNTS: Record<Period, { label: string; badge: string | null; months: number; factor: number }> = {
-  monthly:   { label: "monthly",  badge: null,        months: 1,  factor: 1.00 },
-  quarterly: { label: "3 months", badge: "save 11%",  months: 3,  factor: 0.89 },
-  biannual:  { label: "6 months", badge: "save 22%",  months: 6,  factor: 0.78 },
-  yearly:    { label: "yearly",   badge: "save 33%",  months: 12, factor: 0.67 },
+const BILLING: Record<Period, { label: string; badge: string | null }> = {
+  monthly: { label: "monthly", badge: null },
+  yearly:  { label: "yearly",  badge: "save 36%" },
 };
 
-const PERIODS: Period[] = ["monthly", "quarterly", "biannual", "yearly"];
+const PERIODS: Period[] = ["monthly", "yearly"];
 
-function planRow(base: number, prefix: string, d: typeof DISCOUNTS[Period]) {
-  const perMonth = d.months === 1 ? base : Math.floor(base * d.factor);
-  const total    = d.months === 1 ? base : Math.floor(base * d.months * d.factor);
-  return { perMonth, total, paddleId: `${prefix}_${d.label.replace(" ", "_")}` };
+const SOLO_YEARLY = 69;
+const TEAM_YEARLY = 119;
+
+function planRow(monthlyPrice: number, yearlyPrice: number, period: Period) {
+  const perMonth = period === "monthly" ? monthlyPrice : Math.round(yearlyPrice / 12);
+  const total    = period === "monthly" ? monthlyPrice : yearlyPrice;
+  return { perMonth, total };
 }
 
 // ── Feature lists ─────────────────────────────────────────────────────────────
@@ -102,10 +103,9 @@ const faqs = [
 export default function Pricing() {
   const [period, setPeriod] = useState<Period>("monthly");
 
-  const hidden   = useHiddenTiers("deepstrain");
-  const d        = DISCOUNTS[period];
-  const solo     = planRow(SOLO_BASE, "solo", d);
-  const team     = planRow(TEAM_BASE, "team", d);
+  const hidden = useHiddenTiers("deepstrain");
+  const solo   = planRow(SOLO_BASE, SOLO_YEARLY, period);
+  const team   = planRow(TEAM_BASE, TEAM_YEARLY, period);
 
   const handleCheckout = (tier: "solo" | "team") => {
     if (typeof window !== "undefined") {
@@ -151,7 +151,7 @@ export default function Pricing() {
           <div className="flex items-center justify-center mb-12">
             <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
               {PERIODS.map((p) => {
-                const b = DISCOUNTS[p];
+                const b = BILLING[p];
                 return (
                   <button
                     key={p}
@@ -197,7 +197,7 @@ export default function Pricing() {
                 <p className="text-gray-500 text-sm mb-1 font-mono">
                   {period === "monthly"
                     ? "billed monthly — cancel anytime"
-                    : `billed ${SYM}${solo.total} every ${d.months} months`}
+                    : `billed ${SYM}${solo.total} yearly`}
                 </p>
                 <p className="text-strain-400 text-xs font-mono mb-6">1-day free trial — no card charge until day 2</p>
 
@@ -247,7 +247,7 @@ export default function Pricing() {
                 <p className="text-gray-500 text-sm mb-1 font-mono">
                   {period === "monthly"
                     ? "billed monthly — cancel anytime"
-                    : `billed ${SYM}${team.total} every ${d.months} months`}
+                    : `billed ${SYM}${team.total} yearly`}
                 </p>
                 <p className="text-strain-400 text-xs font-mono mb-6">1-day free trial — no card charge until day 2</p>
 

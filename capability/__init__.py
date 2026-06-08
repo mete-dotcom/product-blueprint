@@ -25,6 +25,13 @@ from capability.contracts import (
     SandboxRequirements,
 )
 
+from capability.auto_update import (
+    UpdateInfo,
+    check_for_updates,
+    auto_update,
+    add_update_parser,
+)
+
 __all__ = [
     "BaseAdapter",
     "BaseCapability",
@@ -34,4 +41,8 @@ __all__ = [
     "EvidenceRequirements",
     "ExecutionJournalEntry",
     "SandboxRequirements",
+    "UpdateInfo",
+    "check_for_updates",
+    "auto_update",
+    "add_update_parser",
 ]

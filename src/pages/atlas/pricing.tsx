@@ -19,12 +19,10 @@ const SYM     = CURR === "USD" ? "$" : CURR;
 
 // Paddle price IDs — replace with real IDs from Paddle Dashboard
 const PADDLE_IDS = {
-  solo_monthly:        process.env.NEXT_PUBLIC_ATLAS_SOLO_MONTHLY        || "pri_atlas_solo_m",
-  solo_yearly:         process.env.NEXT_PUBLIC_ATLAS_SOLO_YEARLY         || "pri_atlas_solo_y",
-  pro_monthly:         process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY         || "pri_atlas_pro_m",
-  pro_yearly:          process.env.NEXT_PUBLIC_ATLAS_PRO_YEARLY          || "pri_atlas_pro_y",
-  enterprise_monthly:  process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY         || "pri_atlas_ent_m",
-  enterprise_yearly:   process.env.NEXT_PUBLIC_ATLAS_ENT_YEARLY          || "pri_atlas_ent_y",
+  pro_monthly:        process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY        || "ls_atlas_pro_m",
+  pro_yearly:         process.env.NEXT_PUBLIC_ATLAS_PRO_YEARLY         || "ls_atlas_pro_y",
+  enterprise_monthly: process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY        || "ls_atlas_ent_m",
+  enterprise_yearly:  process.env.NEXT_PUBLIC_ATLAS_ENT_YEARLY         || "ls_atlas_ent_y",
 };
 
 // ── Module icons & metadata ───────────────────────────────────────────────────
@@ -86,38 +84,26 @@ const TIERS: Tier[] = [
     paddleYearly: "",
     color: "border-slate-700",
     highlight: false,
-    desc: "Full scan engine, HTML report. No modules.",
-  },
-  {
-    id: "solo",
-    name: "Solo",
-    monthly: BASE,
-    yearly: Math.floor(BASE * 10),
-    modules: ["core", "system_map"],
-    paddleMonthly: PADDLE_IDS.solo_monthly,
-    paddleYearly: PADDLE_IDS.solo_yearly,
-    color: "border-cyan-800",
-    highlight: false,
-    desc: "Dependency visualization for solo devs.",
+    desc: "Full scan engine, HTML report. Core only.",
   },
   {
     id: "pro",
     name: "Pro",
     badge: "most popular",
-    monthly: 29,
-    yearly: 290,
+    monthly: 12,
+    yearly: 99,
     modules: ["core", "system_map", "risk_radar", "security_shield", "code_health", "signal_map", "atlas_mcp"],
     paddleMonthly: PADDLE_IDS.pro_monthly,
     paddleYearly: PADDLE_IDS.pro_yearly,
     color: "border-[hsl(192,91%,47%)]",
     highlight: true,
-    desc: "Full analysis suite for professional teams.",
+    desc: "Full analysis suite. 7 modules.",
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    monthly: 59,
-    yearly: 590,
+    monthly: 29,
+    yearly: 229,
     modules: [
       "core", "system_map", "risk_radar", "security_shield", "code_health",
       "signal_map", "atlas_mcp", "decision_center", "ownership_map", "rewind", "what_if", "commit_guard",
@@ -135,9 +121,10 @@ const ALL_MODULES = [
   "signal_map", "atlas_mcp", "decision_center", "ownership_map", "rewind", "what_if", "commit_guard",
 ];
 
-function openPaddle(priceId: string) {
-  if (!priceId || typeof window === "undefined" || !window.Paddle) return;
-  window.Paddle.Checkout.open({ items: [{ priceId, quantity: 1 }] });
+const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
+function openCheckout(variantId: string) {
+  if (!variantId || typeof window === "undefined") return;
+  window.location.href = `https://${LEMON_STORE}/buy/${variantId}?checkout[custom][product]=atlas`;
 }
 
 export default function AtlasPricing() {
@@ -263,7 +250,7 @@ export default function AtlasPricing() {
                     <>
                       <p className="text-[hsl(192,91%,47%)] text-[10px] font-mono mb-1.5 text-center">1-day free trial</p>
                       <button
-                        onClick={() => openPaddle(paddleId)}
+                        onClick={() => openCheckout(paddleId)}
                         className={`w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 ${
                           tier.highlight
                             ? "bg-[hsl(192,91%,47%)] text-black hover:bg-[hsl(192,91%,55%)]"

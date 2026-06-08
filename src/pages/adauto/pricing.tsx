@@ -23,9 +23,10 @@ const PADDLE_IDS = {
 
 type Period = "monthly" | "yearly";
 
-function openPaddle(priceId: string) {
-  if (!priceId || typeof window === "undefined" || !window.Paddle) return;
-  window.Paddle.Checkout.open({ items: [{ priceId, quantity: 1 }] });
+const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
+function openCheckout(variantId: string) {
+  if (!variantId || typeof window === "undefined") return;
+  window.location.href = `https://${LEMON_STORE}/buy/${variantId}?checkout[custom][product]=adauto`;
 }
 
 // ── Feature rows ──────────────────────────────────────────────────────────────
@@ -56,7 +57,8 @@ export default function AdautoPricing() {
   const [period, setPeriod] = useState<Period>("monthly");
   const hidden = useHiddenTiers("adauto");
 
-  const proPrice = period === "monthly" ? BASE : Math.floor(BASE * 10);
+  const PRO_YEARLY = 69;
+  const proPrice = period === "monthly" ? BASE : PRO_YEARLY;
   const paddleId = period === "monthly" ? PADDLE_IDS.pro_monthly : PADDLE_IDS.pro_yearly;
 
   return (
@@ -170,7 +172,7 @@ export default function AdautoPricing() {
               </ul>
               <p className="text-[10px] font-mono mb-2 text-center" style={{ color: "#fb923c" }}>1-day free trial — cancel before day 2, pay nothing</p>
               <button
-                onClick={() => openPaddle(paddleId)}
+                onClick={() => openCheckout(paddleId)}
                 className="w-full text-sm font-mono py-2.5 rounded font-semibold transition-all flex items-center justify-center gap-2 text-black hover:opacity-90"
                 style={{ background: "linear-gradient(90deg,#f59e0b,#fb923c)" }}
               >

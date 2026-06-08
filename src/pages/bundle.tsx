@@ -20,12 +20,11 @@ const combined    = DS_TEAM_PRICE + ATLAS_PRO_PRICE;
 const bundlePrice = Math.floor(combined * (1 - DISCOUNT));
 const savings     = combined - bundlePrice;
 
-function openPaddle(priceIds: string[]) {
-  if (typeof window === "undefined" || !window.Paddle) return;
-  // open first, then upsell second — or use Paddle multi-item if available
-  window.Paddle.Checkout.open({
-    items: priceIds.map((id) => ({ priceId: id, quantity: 1 })),
-  });
+const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
+function openCheckout(variantIds: string[]) {
+  if (typeof window === "undefined" || !variantIds[0]) return;
+  // LS: open deepstrain Team first — atlas Pro opens after in sequence
+  window.location.href = `https://${LEMON_STORE}/buy/${variantIds[0]}?checkout[custom][product]=deepstrain&checkout[custom][bundle]=true`;
 }
 
 export default function Bundle() {
@@ -132,7 +131,7 @@ export default function Bundle() {
 
             {!started ? (
               <button
-                onClick={() => { setStarted(true); openPaddle([BUNDLE_DS_PADDLE, BUNDLE_ATLAS_PADDLE]); }}
+                onClick={() => { setStarted(true); openCheckout([BUNDLE_DS_PADDLE, BUNDLE_ATLAS_PADDLE]); }}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-[hsl(192,91%,47%)] text-black font-bold font-mono rounded-lg hover:bg-[hsl(192,91%,55%)] transition-colors text-sm"
               >
                 get the bundle <ArrowRight className="w-4 h-4" />

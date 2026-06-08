@@ -1010,7 +1010,7 @@ function SectionCaseStudy() {
             download="CLAUDE.md"
             className="text-xs px-3 py-1.5 bg-strain-600 hover:bg-strain-500 text-white rounded-lg transition-colors"
           >
-            İndir
+            Download
           </a>
         </div>
         <div className="p-4 bg-black/30">

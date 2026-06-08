@@ -238,7 +238,101 @@ GET  /api/session  — Terminal'in poll ettiği endpoint (KV'den okur)
 
 ---
 
-## 7. Vercel Yapılandırması
+## 7. Auto-Update Mekanizması
+
+> Ortak modül: `capability/auto_update.py`
+
+Her ürün, PyPI'da yeni sürüm olup olmadığını kontrol edebilir ve opsiyonel olarak otomatik güncelleyebilir.
+
+### 7.1 Tasarım İlkeleri
+
+| İlke | Açıklama |
+|---|---|
+| **Bloklamaz** | PyPI kontrolü background thread'de, maks 3sn timeout. Cache varsa direkt döner |
+| **Günde 1 kere** | `~/.<product>/update_cache.json` — 24 saat TTL |
+| **Saygılı** | `<PRODUCT>_NO_UPDATE=1` ile devre dışı bırakılabilir |
+| **Sessiz** | Güncelleme yoksa hiçbir şey yazmaz. Güncelleme varsa stderr'e not |
+| **Otomatik** | `auto_update()` ile sessizce günceller. `--check` ile sadece kontrol |
+| **Her yerde aynı** | `capability/auto_update.py` tüm ürünlerde ortak |
+
+### 7.2 Kullanım
+
+```python
+# Ürün başlangıcında (background):
+from capability.auto_update import check_for_updates
+check_for_updates("deepstrain", __version__)  # background thread
+
+# CLI komutu:
+# deepstrain update       → kontrol + kullanıcıya sor + güncelle
+# deepstrain update --check → sadece kontrol
+```
+
+### 7.3 API
+
+```python
+def check_for_updates(
+    package: str,           # "deepstrain" | "code-atlas" | "adauto"
+    current_version: str,   # __version__
+    interval_hours: int = 24,
+    pip_args: str = "",
+    on_update: Callable | None = None,
+    background: bool = True,
+) -> UpdateInfo:
+    ...
+
+def auto_update(
+    package: str,
+    current_version: str,
+    interval_hours: int = 24,
+    pip_args: str = "--quiet",
+    interactive: bool = False,
+) -> UpdateInfo:
+    ...
+
+def add_update_parser(subparsers, package: str = "deepstrain") -> None:
+    """CLI'ye 'update' subcommand ekler."""
+    ...
+```
+
+### 7.4 Entegrasyon
+
+Her ürünün `cli.py`'sinde:
+
+```python
+# 1. Startup'ta background kontrol
+from capability.auto_update import check_for_updates
+check_for_updates("deepstrain", __version__)
+
+# 2. CLI'da "update" komutu
+parser = argparse.ArgumentParser()
+sub = parser.add_subparsers()
+from capability.auto_update import add_update_parser
+add_update_parser(sub, package="deepstrain")
+```
+
+### 7.5 Cache Formatı (`~/.deepstrain/update_cache.json`)
+
+```json
+{
+  "package": "deepstrain",
+  "latest_version": "0.8.0",
+  "release_url": "https://pypi.org/project/deepstrain/",
+  "checked_at": 1717500000.0
+}
+```
+
+### 7.6 Environment Variable
+
+```bash
+# Güncelleme kontrolünü tamamen kapat
+DEEPSTRAIN_NO_UPDATE=1
+ATLAS_NO_UPDATE=1
+ADAUTO_NO_UPDATE=1
+```
+
+---
+
+## 8. Vercel Yapılandırması
 
 ### `vercel.json`
 
@@ -284,7 +378,7 @@ if str(_API_DIR) not in sys.path:
 
 ---
 
-## 8. deepstrain Entegrasyonu
+## 9. deepstrain Entegrasyonu
 
 Ürünün kendi geliştirmesi sırasında deepstrain kullanılır:
 
@@ -306,7 +400,7 @@ curl -X POST http://localhost:8765/eval \
 
 ---
 
-## 9. LLM Rehber Dosyası
+## 10. LLM Rehber Dosyası
 
 Her ürün reposunda `<PRODUCT>_LLM_GUIDE.md` bulunur.  
 Bağlanan herhangi bir LLM bu dosyayı okuyarak ürünü anlar.
@@ -321,7 +415,7 @@ Bağlanan herhangi bir LLM bu dosyayı okuyarak ürünü anlar.
 
 ---
 
-## 10. Yeni Ürün Kontrol Listesi
+## 11. Yeni Ürün Kontrol Listesi
 
 ```
 [ ] pip install edilebilir paket (pyproject.toml / setup.cfg)
@@ -337,13 +431,14 @@ Bağlanan herhangi bir LLM bu dosyayı okuyarak ürünü anlar.
 [ ] api/verify.py + api/webhook.py + api/session.py (BaseHTTPRequestHandler)
 [ ] vercel.json: @vercel/python runtime, SSO protection kapalı
 [ ] <PRODUCT>_LLM_GUIDE.md
+[ ] auto_update.py — PyPI güncelleme kontrolü + `update` CLI komutu
 [ ] CHANGELOG.md — sürüm geçmişi
 [ ] deepstrain ile test edildi (plan_first akışı)
 ```
 
 ---
 
-## 11. Sürüm Standardı
+## 12. Sürüm Standardı
 
 Sürüm numarası şu dosyalarda tutarlı olmalı:
 
@@ -358,7 +453,7 @@ Güncelleme sırası: `__init__.py` → `pyproject.toml` → `setup.cfg` → `po
 
 ---
 
-## 12. Referans Implementasyonlar
+## 13. Referans Implementasyonlar
 
 | Ürün | Repo | Özellik |
 |---|---|---|

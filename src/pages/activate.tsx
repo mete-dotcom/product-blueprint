@@ -14,23 +14,26 @@ const BASE_MONTHLY = Number(process.env.NEXT_PUBLIC_DEEPSTRAIN_PRICE || "9");
 const CURRENCY     = process.env.NEXT_PUBLIC_DEEPSTRAIN_CURRENCY || "USD";
 const SYM          = CURRENCY === "USD" ? "$" : CURRENCY;
 
-// ── Billing periods (must match webhook.ts BILLING_DURATIONS) ────────────────
-type Period = "monthly" | "quarterly" | "biannual" | "yearly";
+// ── Billing periods ───────────────────────────────────────────────────────────
+type Period = "monthly" | "yearly";
 
-const BILLING: Record<Period, {
-  label: string;
-  badge: string | null;
-  months: number;
-  perMonth: number;
-  total: number;
-  paddleId: string;
-}> = {
-  monthly:  { label: "monthly",  badge: null,        months: 1,  perMonth: BASE_MONTHLY,                          total: BASE_MONTHLY,                              paddleId: "pro_monthly"  },
-  quarterly:{ label: "3 months", badge: "save 11%",  months: 3,  perMonth: Math.floor(BASE_MONTHLY * 0.89),       total: Math.floor(BASE_MONTHLY * 3  * 0.89),      paddleId: "pro_quarterly"},
-  biannual: { label: "6 months", badge: "save 22%",  months: 6,  perMonth: Math.floor(BASE_MONTHLY * 0.78),       total: Math.floor(BASE_MONTHLY * 6  * 0.78),      paddleId: "pro_biannual" },
-  yearly:   { label: "yearly",   badge: "save 33%",  months: 12, perMonth: Math.floor(BASE_MONTHLY * 0.67),       total: Math.floor(BASE_MONTHLY * 12 * 0.67),      paddleId: "pro_yearly"   },
+const SOLO_YEARLY_PRICE = 69;
+const TEAM_YEARLY_PRICE = 119;
+
+const BILLING: Record<Period, { label: string; badge: string | null }> = {
+  monthly: { label: "monthly", badge: null },
+  yearly:  { label: "yearly",  badge: "save 36%" },
 };
-const PERIODS: Period[] = ["monthly", "quarterly", "biannual", "yearly"];
+const PERIODS: Period[] = ["monthly", "yearly"];
+
+// ── Lemon Squeezy variant map ─────────────────────────────────────────────────
+const LEMON_STORE   = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
+const LS_VARIANTS: Record<string, string> = {
+  solo_monthly: process.env.NEXT_PUBLIC_DS_SOLO_MONTHLY || "",
+  solo_yearly:  process.env.NEXT_PUBLIC_DS_SOLO_YEARLY  || "",
+  team_monthly: process.env.NEXT_PUBLIC_DS_TEAM_MONTHLY || "",
+  team_yearly:  process.env.NEXT_PUBLIC_DS_TEAM_YEARLY  || "",
+};
 
 // ── Stages ───────────────────────────────────────────────────────────────────
 type Stage = "auth" | "checkout" | "processing" | "done";
@@ -59,9 +62,13 @@ export default function Activate() {
   const [alreadyActivated, setAlreadyActivated] = useState(false); // skipped checkout
 
   const plan     = BILLING[period];
-  const price    = plan.perMonth;
-  const paddleId = plan.paddleId;
-  const savings  = plan.badge ? `${plan.badge} — billed ${SYM}${plan.total} every ${plan.months} month${plan.months > 1 ? "s" : ""}` : null;
+  const tier     = tierParam === "team" ? "team" : "solo";
+  const price    = period === "monthly"
+    ? (tier === "team" ? 15 : BASE_MONTHLY)
+    : (tier === "team" ? Math.round(TEAM_YEARLY_PRICE / 12) : Math.round(SOLO_YEARLY_PRICE / 12));
+  const savings  = plan.badge
+    ? `${plan.badge} — billed ${SYM}${tier === "team" ? TEAM_YEARLY_PRICE : SOLO_YEARLY_PRICE} yearly`
+    : null;
 
   const emailRef = useRef<HTMLInputElement>(null);
   useEffect(() => { emailRef.current?.focus(); }, []);
@@ -104,29 +111,18 @@ export default function Activate() {
     }
   };
 
-  // ── Paddle checkout ───────────────────────────────────────────────────────
+  // ── Lemon Squeezy checkout ───────────────────────────────────────────────
   const handleCheckout = () => {
-    const passthrough = JSON.stringify({
-      tier:    tierParam === "team" ? "team" : "solo",
-      billing: period,
-      session: session,   // links payment to the terminal poll
-      email:   email,     // pre-fills Paddle email field
-    });
+    const tier      = tierParam === "team" ? "team" : "solo";
+    const variantId = LS_VARIANTS[`${tier}_${period}`] || LS_VARIANTS["solo_monthly"];
+    if (!variantId) return;
 
-    if (typeof window !== "undefined" && window.Paddle?.Checkout) {
-      window.Paddle.Checkout.open({
-        product: paddleId,
-        email:   email,   // pre-fill Paddle's email field
-        passthrough,
-        successCallback: () => {
-          setStage("done");
-        },
-      });
-    } else {
-      // Dev / no Paddle SDK fallback
-      setStage("processing");
-      setTimeout(() => setStage("done"), 2000);
-    }
+    const params = new URLSearchParams();
+    if (email)   params.set("checkout[email]",            email);
+    if (session) params.set("checkout[custom][session]",  session);
+    params.set("checkout[custom][product]", "deepstrain");
+
+    window.location.href = `https://${LEMON_STORE}/buy/${variantId}?${params.toString()}`;
   };
 
   return (
@@ -328,8 +324,8 @@ export default function Activate() {
                   onClick={handleCheckout}
                   className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 bg-strain-600 hover:bg-strain-500 text-white font-semibold rounded-xl transition-all duration-200 glow group"
                 >
-                  pay {SYM}{plan.total}
-                  {plan.months === 1 ? "/mo" : ` / ${plan.months} mo`}
+                  pay {SYM}{period === "monthly" ? price : (tier === "team" ? TEAM_YEARLY_PRICE : SOLO_YEARLY_PRICE)}
+                  {period === "monthly" ? "/mo" : "/yr"}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
