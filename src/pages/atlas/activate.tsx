@@ -5,8 +5,10 @@
  * Flow:
  *   1. CLI opens this page with ?session=<id>
  *   2. User logs in (or registers) → existing license pushed to KV
- *   3. Or: user clicks Checkout → Paddle → webhook stores license
+ *   3. Or: user clicks Checkout → Lemon Squeezy → webhook stores license
  *   4. CLI polls /api/atlas/session?id=<id> and writes license locally
+ *
+ * Payment: Lemon Squeezy (NOT Paddle) — we redirect to {LEMON_STORE}/buy/{variantId}.
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -16,6 +18,11 @@ import { MassironNav } from "../../components/MassironNav";
 import { MassironFooter } from "../../components/MassironFooter";
 
 type Stage = "auth" | "checking" | "checkout" | "polling" | "done" | "error";
+
+// ── Lemon Squeezy store + variant ids ─────────────────────────────────────────
+// TODO: the fallback placeholder ids (ls_atlas_*) are only used until the real
+// Lemon Squeezy variant IDs are set via the NEXT_PUBLIC_ATLAS_* env vars.
+const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
 
 export default function AtlasActivate() {
   const router = useRouter();
@@ -90,18 +97,17 @@ export default function AtlasActivate() {
     }, 2000);
   }
 
-  // ── Paddle checkout ───────────────────────────────────────────────────────
-  function openCheckout(priceId: string) {
-    if (!priceId) {
+  // ── Lemon Squeezy checkout ────────────────────────────────────────────────
+  function openCheckout(variantId: string) {
+    if (!variantId) {
       setError("Checkout unavailable — contact support@massiron.com");
       return;
     }
-    const w = window as unknown as { Paddle?: { Checkout?: { open: (o: object) => void } } };
-    w.Paddle?.Checkout?.open({
-      items: [{ priceId, quantity: 1 }],
-      customData: { session: sessionId.current, product: "atlas", email },
-      successUrl: `${window.location.origin}/atlas/activate?session=${sessionId.current}&done=1`,
-    });
+    const params = new URLSearchParams();
+    if (email)               params.set("checkout[email]",           email);
+    if (sessionId.current)   params.set("checkout[custom][session]", sessionId.current);
+    params.set("checkout[custom][product]", "atlas");
+    window.location.href = `https://${LEMON_STORE}/buy/${variantId}?${params.toString()}`;
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -109,17 +115,6 @@ export default function AtlasActivate() {
     <>
       <Head>
         <title>ATLAS Activate</title>
-        {process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN && (
-          <script
-            src="https://cdn.paddle.com/paddle/v2/paddle.js"
-            onLoad={() => {
-              const w = window as unknown as { Paddle?: { Environment?: { set: (e: string) => void }; Initialize: (o: object) => void } };
-              if (process.env.NEXT_PUBLIC_PADDLE_SANDBOX === "true")
-                w.Paddle?.Environment?.set("sandbox");
-              w.Paddle?.Initialize({ token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN });
-            }}
-          />
-        )}
       </Head>
       <MassironNav activeProduct="atlas" />
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 pt-14">
@@ -181,22 +176,18 @@ export default function AtlasActivate() {
                 {/* Prices pulled from env at build time — NEXT_PUBLIC_ vars are inlined by Next.js */}
                 {([
                   {
-                    label: "Solo",
-                    price: `$${process.env.NEXT_PUBLIC_ATLAS_PRICE ?? "19"}/mo`,
-                    desc:  "Core Engine · System Map",
-                    id:    process.env.NEXT_PUBLIC_ATLAS_SOLO_MONTHLY ?? "",
-                  },
-                  {
                     label: "Pro",
-                    price: `$${String(Number(process.env.NEXT_PUBLIC_ATLAS_PRICE ?? "19") * 2)}/mo`,
-                    desc:  "Solo + Risk Radar · Security Shield · Code Health · Signal Map · MCP Server",
-                    id:    process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY ?? "",
+                    price: `$${process.env.NEXT_PUBLIC_ATLAS_PRO_PRICE ?? process.env.NEXT_PUBLIC_ATLAS_PRICE ?? "19"}/mo`,
+                    desc:  "Core + System Map · Risk Radar · Security Shield · Code Health · Signal Map · MCP Server",
+                    // TODO: real Lemon Squeezy variant ID via NEXT_PUBLIC_ATLAS_PRO_MONTHLY
+                    id:    process.env.NEXT_PUBLIC_ATLAS_PRO_MONTHLY ?? "ls_atlas_pro_m",
                   },
                   {
                     label: "Enterprise",
                     price: `$${String(Number(process.env.NEXT_PUBLIC_ATLAS_PRICE ?? "19") * 4)}/mo`,
                     desc:  "Pro + Decision Center · Ownership Map · Rewind · What-If · Commit Guard",
-                    id:    process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY ?? "",
+                    // TODO: real Lemon Squeezy variant ID via NEXT_PUBLIC_ATLAS_ENT_MONTHLY
+                    id:    process.env.NEXT_PUBLIC_ATLAS_ENT_MONTHLY ?? "ls_atlas_ent_m",
                   },
                 ] as { label: string; price: string; desc: string; id: string }[]).map((plan) => (
                   <button

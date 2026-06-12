@@ -5,8 +5,10 @@
  * Flow:
  *   1. CLI opens this page with ?session=<id>
  *   2. User logs in (or registers) → existing license pushed to KV
- *   3. Or: user clicks Checkout → Paddle → webhook stores license
+ *   3. Or: user clicks Checkout → Lemon Squeezy → webhook stores license
  *   4. CLI polls /api/adauto/session?id=<id> and writes license locally
+ *
+ * Payment: Lemon Squeezy (NOT Paddle) — we redirect to {LEMON_STORE}/buy/{variantId}.
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -16,6 +18,11 @@ import { MassironNav } from "../../components/MassironNav";
 import { MassironFooter } from "../../components/MassironFooter";
 
 type Stage = "auth" | "checking" | "checkout" | "polling" | "done" | "error";
+
+// ── Lemon Squeezy store + variant ids ─────────────────────────────────────────
+// TODO: the fallback placeholder id (ls_adauto_*) is only used until the real
+// Lemon Squeezy variant ID is set via the NEXT_PUBLIC_ADAUTO_* env vars.
+const LEMON_STORE = process.env.NEXT_PUBLIC_LEMON_STORE || "massiron.lemonsqueezy.com";
 
 export default function AdautoActivate() {
   const router = useRouter();
@@ -87,18 +94,17 @@ export default function AdautoActivate() {
     }, 2000);
   }
 
-  // ── Paddle checkout ───────────────────────────────────────────────────────
-  function openCheckout(priceId: string) {
-    if (!priceId) {
+  // ── Lemon Squeezy checkout ────────────────────────────────────────────────
+  function openCheckout(variantId: string) {
+    if (!variantId) {
       setError("Checkout unavailable — contact support@massiron.com");
       return;
     }
-    const w = window as unknown as { Paddle?: { Checkout?: { open: (o: object) => void } } };
-    w.Paddle?.Checkout?.open({
-      items: [{ priceId, quantity: 1 }],
-      customData: { session: sessionId.current, product: "adauto", email },
-      successUrl: `${window.location.origin}/adauto/activate?session=${sessionId.current}&done=1`,
-    });
+    const params = new URLSearchParams();
+    if (email)               params.set("checkout[email]",           email);
+    if (sessionId.current)   params.set("checkout[custom][session]", sessionId.current);
+    params.set("checkout[custom][product]", "adauto");
+    window.location.href = `https://${LEMON_STORE}/buy/${variantId}?${params.toString()}`;
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -106,17 +112,6 @@ export default function AdautoActivate() {
     <>
       <Head>
         <title>ADAUTO Activate</title>
-        {process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN && (
-          <script
-            src="https://cdn.paddle.com/paddle/v2/paddle.js"
-            onLoad={() => {
-              const w = window as unknown as { Paddle?: { Environment?: { set: (e: string) => void }; Initialize: (o: object) => void } };
-              if (process.env.NEXT_PUBLIC_PADDLE_SANDBOX === "true")
-                w.Paddle?.Environment?.set("sandbox");
-              w.Paddle?.Initialize({ token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN });
-            }}
-          />
-        )}
       </Head>
       <MassironNav activeProduct="adauto" />
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 pt-14">
@@ -186,7 +181,8 @@ export default function AdautoActivate() {
                     label: "Pro",
                     price: `$${process.env.NEXT_PUBLIC_ADAUTO_PRICE ?? "12"}/mo`,
                     desc:  "unlimited campaigns · all platforms · approval gate · cost tracking",
-                    id:    process.env.NEXT_PUBLIC_ADAUTO_PRO_MONTHLY ?? "",
+                    // TODO: real Lemon Squeezy variant ID via NEXT_PUBLIC_ADAUTO_PRO_MONTHLY
+                    id:    process.env.NEXT_PUBLIC_ADAUTO_PRO_MONTHLY ?? "ls_adauto_pro_m",
                   },
                 ] as { label: string; price: string; desc: string; id: string }[]).map((plan) => (
                   <button

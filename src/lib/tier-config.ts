@@ -21,6 +21,7 @@ export const TIER_CATALOG: Record<string, string[]> = {
   deepstrain: ["solo", "team", "enterprise"],
   atlas:      ["solo", "pro", "enterprise"],
   adauto:     ["free", "pro"],
+  nodestone:  ["free", "pro", "team"],
 };
 
 export type VisibilityMap = Record<string, boolean>;

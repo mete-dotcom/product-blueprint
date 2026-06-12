@@ -7,7 +7,7 @@ import Link from "next/link";
 import { MassironMark } from "./MassironMark";
 import { WORDMARK_STYLE } from "../lib/brand";
 
-type Product = "deepstrain" | "atlas" | "adauto" | null;
+type Product = "deepstrain" | "atlas" | "adauto" | "nodestone" | null;
 
 interface MassironNavProps {
   /** Highlight the active product link. */
@@ -21,6 +21,7 @@ export function MassironNav({ activeProduct = null }: MassironNavProps) {
       deepstrain: "text-green-400",
       atlas:      "text-cyan-400",
       adauto:     "text-amber-400",
+      nodestone:  "text-sky-400",
     };
     const base = "text-xs font-mono transition-colors";
     const color = isActive && p ? colors[p] : "text-slate-500 hover:text-slate-300";
@@ -53,6 +54,7 @@ export function MassironNav({ activeProduct = null }: MassironNavProps) {
           {link("deepstrain", "/deepstrain", "deepstrain")}
           {link("atlas", "/atlas", "atlas")}
           {link("adauto", "/adauto", "adauto")}
+          {link("nodestone", "/nodestone", "nodestone")}
           <Link href="/docs"
             className={`text-xs font-mono transition-colors ${activeProduct === null ? "text-slate-500 hover:text-slate-300" : "text-slate-600 hover:text-slate-400"}`}>
             docs

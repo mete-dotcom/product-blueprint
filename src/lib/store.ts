@@ -210,3 +210,42 @@ export async function setAdautoActivation(
 export async function deleteAdautoActivation(sessionId: string): Promise<void> {
   await kv.del(`adauto:act:${sessionId}`);
 }
+
+// ─── Nodestone types ───────────────────────────────────────────────────────────
+
+export interface NodestoneLicense {
+  version:         string;
+  email:           string;
+  tier:            "free" | "pro" | "team";
+  issued_at:       string;
+  expires_at:      string;
+  sale_id:         string;
+  subscription_id: string;
+  signature:       string;
+}
+
+// ─── Nodestone KV helpers ──────────────────────────────────────────────────────
+
+export async function getNodestoneLicense(email: string): Promise<NodestoneLicense | null> {
+  return kv.get<NodestoneLicense>(`nodestone:lic:${email.toLowerCase()}`);
+}
+
+export async function setNodestoneLicense(email: string, lic: NodestoneLicense): Promise<void> {
+  await kv.set(`nodestone:lic:${email.toLowerCase()}`, lic);
+}
+
+export async function getNodestoneActivation(sessionId: string): Promise<NodestoneLicense | null> {
+  return kv.get<NodestoneLicense>(`nodestone:act:${sessionId}`);
+}
+
+export async function setNodestoneActivation(
+  sessionId: string,
+  lic: NodestoneLicense,
+  ttlSec = 7200,
+): Promise<void> {
+  await kv.set(`nodestone:act:${sessionId}`, lic, { ex: ttlSec });
+}
+
+export async function deleteNodestoneActivation(sessionId: string): Promise<void> {
+  await kv.del(`nodestone:act:${sessionId}`);
+}

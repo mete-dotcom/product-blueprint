@@ -4,9 +4,10 @@ import { MassironNav } from "../components/MassironNav";
 import { MassironFooter } from "../components/MassironFooter";
 import { ArrowRight, Terminal, GitBranch, Zap, Shield, Package, Activity, Lock, Cpu, BookOpen, AlertTriangle, Users, RotateCcw, Layers, Code, Check } from "lucide-react";
 
-const DS_PRICE     = process.env.NEXT_PUBLIC_DEEPSTRAIN_PRICE    || "9";
-const ATLAS_PRICE  = process.env.NEXT_PUBLIC_ATLAS_PRICE         || "19";
-const ADAUTO_PRICE = process.env.NEXT_PUBLIC_ADAUTO_PRICE        || "29";
+const DS_PRICE        = process.env.NEXT_PUBLIC_DEEPSTRAIN_PRICE    || "9";
+const ATLAS_PRICE     = process.env.NEXT_PUBLIC_ATLAS_PRICE         || "19";
+const ADAUTO_PRICE    = process.env.NEXT_PUBLIC_ADAUTO_PRICE        || "29";
+const NODESTONE_PRICE = process.env.NEXT_PUBLIC_NODESTONE_PRICE     || "7";
 const SYM          = "$";
 const AB           = Number(ATLAS_PRICE);
 
@@ -143,7 +144,7 @@ export default function Hub() {
 
           {/* product dispatch board */}
           <div className="border border-[#1e1e1e]" style={{ background: "#0d0d0d" }}>
-            <div className="grid grid-cols-3 divide-x divide-[#1e1e1e]">
+            <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#1e1e1e]">
               {[
                 {
                   href:    "#deepstrain",
@@ -170,8 +171,20 @@ export default function Hub() {
                   benefit: "cheaper",
                 },
                 {
-                  href:    "#adauto",
+                  href:    "/nodestone",
                   num:     "03",
+                  name:    "nodestone",
+                  role:    "context continuity",
+                  signal:  "● remembering",
+                  color:   "#0ea5e9",
+                  dim:     "#06141f",
+                  price:   `free &middot; pro ${SYM}${NODESTONE_PRICE}/mo`,
+                  copy:    "Your project remembers itself. Persistent local memory so your AI never starts a session from zero.",
+                  benefit: "smarter",
+                },
+                {
+                  href:    "#adauto",
+                  num:     "04",
                   name:    "adauto",
                   role:    "marketing automation",
                   signal:  "● pending review",

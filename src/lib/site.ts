@@ -7,7 +7,7 @@
  * anywhere else in the codebase.
  */
 
-export type Product = "deepstrain" | "atlas" | "adauto";
+export type Product = "deepstrain" | "atlas" | "adauto" | "nodestone";
 
 /** Base site URL, no trailing slash. */
 export const SITE_URL =
