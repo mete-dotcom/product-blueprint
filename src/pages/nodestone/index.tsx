@@ -1,9 +1,9 @@
-import Head from "next/head";
 import Link from "next/link";
 import {
   ArrowRight, Brain, Database, Lock,
   Layers, Zap, BookOpen, RefreshCw,
 } from "lucide-react";
+import { Seo } from "../../components/Seo";
 import { MassironNav } from "../../components/MassironNav";
 import { MassironFooter } from "../../components/MassironFooter";
 
@@ -38,10 +38,11 @@ const steps = [
 export default function NodestoneHome() {
   return (
     <>
-      <Head>
-        <title>nodestone — context continuity engine</title>
-        <meta name="description" content="Your project remembers itself. Stop re-teaching your AI every session. Persistent, local, MCP-native project memory." />
-      </Head>
+      <Seo
+        title="nodestone — context continuity engine"
+        description="Your project remembers itself. Stop re-teaching your AI every session. Persistent, local, MCP-native project memory."
+        path="/nodestone"
+      />
 
       <MassironNav activeProduct="nodestone" />
 

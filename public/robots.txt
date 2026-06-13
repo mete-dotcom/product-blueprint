@@ -1,0 +1,12 @@
+# massiron.com — allow all crawlers and link unfurlers (ChatGPT, Slack, Discord, X)
+User-agent: *
+Allow: /
+
+# Keep utility/account routes out of search indexes
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+Sitemap: https://massiron.com/sitemap.xml

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://massiron.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://massiron.com/pricing</loc><priority>0.9</priority></url>
+  <url><loc>https://massiron.com/bundle</loc><priority>0.9</priority></url>
+  <url><loc>https://massiron.com/docs</loc><priority>0.6</priority></url>
+  <url><loc>https://massiron.com/manifesto</loc><priority>0.5</priority></url>
+  <url><loc>https://massiron.com/deepstrain</loc><priority>0.8</priority></url>
+  <url><loc>https://massiron.com/deepstrain/pricing</loc><priority>0.7</priority></url>
+  <url><loc>https://massiron.com/deepstrain/docs</loc><priority>0.6</priority></url>
+  <url><loc>https://massiron.com/atlas</loc><priority>0.8</priority></url>
+  <url><loc>https://massiron.com/atlas/pricing</loc><priority>0.7</priority></url>
+  <url><loc>https://massiron.com/atlas/docs</loc><priority>0.6</priority></url>
+  <url><loc>https://massiron.com/atlas/demo</loc><priority>0.5</priority></url>
+  <url><loc>https://massiron.com/nodestone</loc><priority>0.8</priority></url>
+  <url><loc>https://massiron.com/nodestone/pricing</loc><priority>0.7</priority></url>
+  <url><loc>https://massiron.com/nodestone/docs</loc><priority>0.6</priority></url>
+  <url><loc>https://massiron.com/adauto</loc><priority>0.8</priority></url>
+  <url><loc>https://massiron.com/adauto/pricing</loc><priority>0.7</priority></url>
+  <url><loc>https://massiron.com/privacy</loc><priority>0.3</priority></url>
+  <url><loc>https://massiron.com/terms</loc><priority>0.3</priority></url>
+  <url><loc>https://massiron.com/refund</loc><priority>0.3</priority></url>
+</urlset>

@@ -4,6 +4,7 @@ import Script from "next/script";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import "@/styles/globals.css";
+import { Seo } from "@/components/Seo";
 
 // ── Visitor tracker ───────────────────────────────────────────────────────────
 function useVisitTracker() {
@@ -44,12 +45,16 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
+      {/* viewport + icons stay here so per-page <Seo> overrides never drop them */}
       <Head>
-        <title>DeepStrain — Deterministic AI Engineering Runtime</title>
-        <meta name="description" content="Terminal-native AI engineering runtime. Deterministic, offline-first, developer-controlled." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/og-image.png" />
       </Head>
+
+      {/* site-wide SEO defaults; any page can render its own <Seo> to override */}
+      <Seo />
 
       {/* Paddle.js v2 — initialized here once for all pages */}
       {process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN && (

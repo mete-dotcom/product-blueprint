@@ -1,10 +1,10 @@
-import Head from "next/head";
 import Link from "next/link";
 import {
   ArrowRight, Terminal, ShieldCheck, BarChart3,
   Zap, GitBranch, Brain, RefreshCw, BookOpen,
   CheckCircle, Film, Globe, Activity,
 } from "lucide-react";
+import { Seo } from "../../components/Seo";
 import { MassironNav } from "../../components/MassironNav";
 import { MassironFooter } from "../../components/MassironFooter";
 
@@ -86,11 +86,11 @@ const steps = [
 export default function AdautoHome() {
   return (
     <>
-      <Head>
-        <title>adauto — developer marketing that learns</title>
-        <meta name="description"
-          content="Local-first developer marketing automation. Generates posts, learns from engagement, requires human approval. $0.00034/post. pip install adauto." />
-      </Head>
+      <Seo
+        title="adauto — developer marketing that learns"
+        description="Local-first developer marketing automation. Generates posts, learns from engagement, requires human approval. $0.00034/post. pip install adauto."
+        path="/adauto"
+      />
 
       <MassironNav activeProduct="adauto" />
 

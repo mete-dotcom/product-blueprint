@@ -87,10 +87,10 @@ nodestone init
 # ✓ nodestone ready`} />
             <p className="text-gray-400 text-sm mb-2 mt-4">Write and recall memories directly:</p>
             <CodeBlock lang="bash" code={`# remember a decision
-nodestone remember "auth: Redis sessions over JWT — need server-side revocation"
+nodestone memory save "auth: Redis sessions over JWT — need server-side revocation"
 
 # recall it later, semantically
-nodestone recall "why redis for auth?"
+nodestone memory recall "why redis for auth?"
 # → "auth: Redis sessions over JWT — need server-side revocation"`} />
           </Step>
 

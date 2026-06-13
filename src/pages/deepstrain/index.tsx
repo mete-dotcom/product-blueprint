@@ -1,9 +1,9 @@
-import Head from "next/head";
 import Link from "next/link";
 import {
   ArrowRight, Terminal, Cpu, Lock,
   Package, Zap, BookOpen, Activity,
 } from "lucide-react";
+import { Seo } from "../../components/Seo";
 import { MassironNav } from "../../components/MassironNav";
 import { MassironFooter } from "../../components/MassironFooter";
 
@@ -48,10 +48,11 @@ const pillars = [
 export default function DeepstrainHome() {
   return (
     <>
-      <Head>
-        <title>deepstrain — autonomous execution runtime</title>
-        <meta name="description" content="Terminal-native AI agent. 52 tools, DeepSeek R1, compiled binary. No framework overhead." />
-      </Head>
+      <Seo
+        title="deepstrain — autonomous execution runtime"
+        description="Terminal-native AI agent. 52 tools, DeepSeek R1, compiled binary. Reads your codebase, edits files, runs tests, commits — 3x fewer turns. BYOK, runs on your machine."
+        path="/deepstrain"
+      />
 
       <MassironNav activeProduct="deepstrain" />
 

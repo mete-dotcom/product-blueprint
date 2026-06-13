@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { Seo } from "../components/Seo";
 import { MassironNav } from "../components/MassironNav";
 import { MassironFooter } from "../components/MassironFooter";
 import { ArrowRight, Terminal, GitBranch, Zap, Shield, Package, Activity, Lock, Cpu, BookOpen, AlertTriangle, Users, RotateCcw, Layers, Code, Check } from "lucide-react";
@@ -81,9 +82,12 @@ export default function Hub() {
 
   return (
     <>
+      <Seo
+        title="massiron — the intelligence is forged"
+        description="massiron builds the intelligence into the tools — deterministic understanding (atlas), autonomous execution (deepstrain), persistent memory (nodestone), ethical marketing (adauto). Owned outright. Swap in any model. The result doesn't change."
+        path="/"
+      />
       <Head>
-        <title>massiron — the intelligence is forged.</title>
-        <meta name="description" content="massiron builds the intelligence into the tools — deterministic understanding (atlas), autonomous execution (deepstrain), owned outright. Swap in any model. The result doesn't change." />
         <style>{`html { scroll-behavior: smooth; }`}</style>
       </Head>
 

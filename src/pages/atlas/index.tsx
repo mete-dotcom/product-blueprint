@@ -1,5 +1,5 @@
-import Head from "next/head";
 import Link from "next/link";
+import { Seo } from "../../components/Seo";
 import {
   Terminal, Cpu, Lock, BarChart2, Shield, Map,
   Radio, Brain, Users, RotateCcw, GitBranch, Zap,
@@ -147,10 +147,11 @@ function CodeGraph() {
 export default function AtlasHome() {
   return (
     <>
-      <Head>
-        <title>ATLAS — Deterministic Code Intelligence</title>
-        <meta name="description" content="Offline code analysis. No LLM. LLM-free rule engine. atlas scan . → HTML report + call graph." />
-      </Head>
+      <Seo
+        title="atlas — deterministic code intelligence"
+        description="Offline code analysis. No LLM, no guesses. atlas scan . → HTML report, dependency graph, risk map and security scan in seconds. Same code, same answer, forever."
+        path="/atlas"
+      />
 
       <div className="min-h-screen font-mono" style={{ background: "#010d1a", color: "#e2e8f0" }}>
 
